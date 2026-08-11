@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Single error page for 404, 403 and any uncaught exception.
+
+  Shows the user what happened and a way out, but deliberately no stack trace:
+  that belongs in the server log, not in a response that could be read by
+  whoever triggered the error.
+-->
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="title">שגיאה</ui:define>
+
+    <ui:define name="content">
+
+        <div class="panel empty-state">
+            <div class="big">אירעה שגיאה</div>
+
+            <p>
+                <h:outputText value="הדף המבוקש לא נמצא."
+                              rendered="#{requestScope['jakarta.servlet.error.status_code'] eq 404}"/>
+                <h:outputText value="אין לך הרשאה לצפות בדף זה."
+                              rendered="#{requestScope['jakarta.servlet.error.status_code'] eq 403}"/>
+                <h:outputText value="אירעה תקלה בעת הטיפול בבקשה. אפשר לנסות שוב."
+                              rendered="#{requestScope['jakarta.servlet.error.status_code'] ne 404
+                                          and requestScope['jakarta.servlet.error.status_code'] ne 403}"/>
+            </p>
+
+            <h:link outcome="/catalog.xhtml" value="חזרה לקטלוג" styleClass="btn"/>
+        </div>
+
+    </ui:define>
+</ui:composition>

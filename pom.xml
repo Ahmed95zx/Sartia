@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>il.ac.openu</groupId>
+  <artifactId>sartia</artifactId>
+  <version>1.0.0</version>
+  <packaging>war</packaging>
+
+  <name>Sartia - Video Rental System</name>
+  <description>Video/DVD rental system built with JSF, JDBC and JAX-RS</description>
+
+  <properties>
+    <maven.compiler.release>17</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+    <jakartaee.version>10.0.0</jakartaee.version>
+    <mysql.version>8.4.0</mysql.version>
+    <hikari.version>5.1.0</hikari.version>
+    <junit.version>5.10.2</junit.version>
+    <payara.version>6.2024.6</payara.version>
+  </properties>
+
+  <dependencies>
+    <!-- Jakarta EE 10 Web Profile: Faces (JSF), CDI, JAX-RS, Servlet, Bean Validation.
+         Scope "provided" - the API is supplied by the application server at runtime. -->
+    <dependency>
+      <groupId>jakarta.platform</groupId>
+      <artifactId>jakarta.jakartaee-web-api</artifactId>
+      <version>${jakartaee.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- JDBC driver for MySQL. -->
+    <dependency>
+      <groupId>com.mysql</groupId>
+      <artifactId>mysql-connector-j</artifactId>
+      <version>${mysql.version}</version>
+    </dependency>
+
+    <!-- JDBC connection pool. A pool is required because opening a TCP connection
+         and authenticating per request does not hold up under concurrent load. -->
+    <dependency>
+      <groupId>com.zaxxer</groupId>
+      <artifactId>HikariCP</artifactId>
+      <version>${hikari.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>sartia</finalName>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+        <configuration>
+          <compilerArgs>
+            <arg>-Xlint:all</arg>
+          </compilerArgs>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>3.4.0</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.2.5</version>
+        <configuration>
+          <includes>
+            <!-- Unit tests. -->
+            <include>**/*Test.java</include>
+            <!-- Integration tests: these need MySQL running with the schema
+                 applied. They are included in the normal build because the
+                 concurrency guarantee they check is the project's central
+                 correctness claim, and a suite that silently skips it would
+                 report success without having verified anything.
+
+                 To run only the unit tests when no database is available:
+                     mvn test -Dgroups='!integration' -->
+            <include>**/*IT.java</include>
+          </includes>
+        </configuration>
+      </plugin>
+
+      <!-- Runs the packaged WAR on an embedded Payara Micro server:
+           mvn payara-micro:start -->
+      <plugin>
+        <groupId>fish.payara.maven.plugins</groupId>
+        <artifactId>payara-micro-maven-plugin</artifactId>
+        <version>2.4</version>
+        <configuration>
+          <payaraVersion>${payara.version}</payaraVersion>
+          <deployWar>true</deployWar>
+          <commandLineOptions>
+            <option>
+              <key>--port</key>
+              <value>8080</value>
+            </option>
+            <option>
+              <key>--contextroot</key>
+              <value>/sartia</value>
+            </option>
+          </commandLineOptions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Shared page frame: header, navigation, message area and footer.
+
+  Every screen inserts itself into the "content" placeholder below, so the
+  chrome exists once. The navigation renders conditionally on the session bean,
+  but that is presentation only - AuthFilter is what actually enforces access.
+-->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets"
+      lang="he" dir="rtl">
+
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title><ui:insert name="title">סרטייה</ui:insert> · סרטייה</title>
+    <h:outputStylesheet library="css" name="sartia.css"/>
+</h:head>
+
+<h:body>
+
+    <header class="site-header">
+        <div class="header-inner">
+            <h:link outcome="/catalog.xhtml" styleClass="brand">
+                סרטייה<span>השאלת סרטים</span>
+            </h:link>
+
+            <nav class="main-nav">
+                <h:link outcome="/catalog.xhtml" value="קטלוג"/>
+
+                <h:link outcome="/my-rentals.xhtml" value="ההשאלות שלי"
+                        rendered="#{userSession.loggedIn}"/>
+
+                <h:link outcome="/admin/movies.xhtml" value="ניהול קטלוג"
+                        rendered="#{userSession.admin}"/>
+
+                <h:link outcome="/admin/returns.xhtml" value="השאלות פתוחות"
+                        rendered="#{userSession.admin}"/>
+            </nav>
+
+            <div class="user-area">
+                <ui:fragment rendered="#{userSession.loggedIn}">
+                    <span class="who">שלום, #{userSession.displayName}</span>
+                    <h:form>
+                        <h:commandButton value="יציאה" action="#{userSession.logout}"
+                                         styleClass="btn btn-secondary btn-sm"/>
+                    </h:form>
+                </ui:fragment>
+
+                <ui:fragment rendered="#{not userSession.loggedIn}">
+                    <h:link outcome="/login.xhtml" value="כניסה" styleClass="btn btn-secondary btn-sm"/>
+                    <h:link outcome="/register.xhtml" value="הרשמה" styleClass="btn btn-sm"/>
+                </ui:fragment>
+            </div>
+        </div>
+    </header>
+
+    <main class="page">
+        <!-- globalOnly: messages attached to a specific input are rendered
+             beside that input by the page itself, not repeated up here. -->
+        <div class="messages">
+            <h:messages globalOnly="true" layout="list"
+                        infoClass="msg-info" errorClass="msg-error"
+                        warnClass="msg-info" fatalClass="msg-error"/>
+        </div>
+
+        <ui:insert name="content"/>
+    </main>
+
+    <footer class="site-footer">
+        סרטייה · פרויקט גמר · האוניברסיטה הפתוחה
+    </footer>
+
+</h:body>
+</html>

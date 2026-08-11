@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The customer's own rentals: what they hold now, and the full history the
+  specification requires them to be able to review.
+  Protected by AuthFilter.
+-->
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="title">ההשאלות שלי</ui:define>
+
+    <ui:define name="content">
+
+        <h1 class="page-title">ההשאלות שלי</h1>
+        <p class="page-subtitle">
+            ניתן להשאיל עד #{myRentalsBean.maxConcurrent} סרטים במקביל ·
+            נותרו #{myRentalsBean.remainingAllowance} השאלות אפשריות
+        </p>
+
+        <!-- currently held -->
+        <div class="panel">
+            <h2>סרטים המושאלים כעת</h2>
+
+            <ui:fragment rendered="#{empty myRentalsBean.open}">
+                <div class="empty-state">
+                    <div class="big">אין סרטים מושאלים כרגע</div>
+                    <div style="margin-bottom:14px;">אפשר לעיין בקטלוג ולהשאיל סרט.</div>
+                    <h:link outcome="/catalog.xhtml" value="למעבר לקטלוג" styleClass="btn"/>
+                </div>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{not empty myRentalsBean.open}">
+                <h:form>
+                    <table class="data">
+                        <thead>
+                            <tr>
+                                <th>סרט</th>
+                                <th>ברקוד</th>
+                                <th>תאריך השאלה</th>
+                                <th>להחזרה עד</th>
+                                <th>סטטוס</th>
+                                <th>פעולה</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <ui:repeat value="#{myRentalsBean.open}" var="rental">
+                                <tr class="#{rental.overdue ? 'row-overdue' : ''}">
+                                    <td>
+                                        <h:link outcome="/movie.xhtml" value="#{rental.movieTitle}">
+                                            <f:param name="id" value="#{rental.movieId}"/>
+                                        </h:link>
+                                    </td>
+                                    <td>#{rental.barcode}</td>
+                                    <td>
+                                        <h:outputText value="#{rental.rentedAt}">
+                                            <f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy"/>
+                                        </h:outputText>
+                                    </td>
+                                    <td>
+                                        <h:outputText value="#{rental.dueDate}">
+                                            <f:convertDateTime type="localDate" pattern="dd/MM/yyyy"/>
+                                        </h:outputText>
+                                    </td>
+                                    <td>
+                                        <h:outputText value="באיחור #{rental.daysOverdue} ימים"
+                                                      styleClass="badge badge-out"
+                                                      rendered="#{rental.overdue}"/>
+                                        <h:outputText value="בתוקף" styleClass="badge badge-ok"
+                                                      rendered="#{not rental.overdue}"/>
+                                        <h:outputText value=" קנס: #{rental.projectedLateFee} ש&quot;ח"
+                                                      rendered="#{rental.overdue}"
+                                                      style="font-size:.8rem;color:#b3261e;"/>
+                                    </td>
+                                    <td>
+                                        <h:commandButton value="החזרה"
+                                                         action="#{myRentalsBean.returnRental(rental.id)}"
+                                                         styleClass="btn btn-sm"/>
+                                    </td>
+                                </tr>
+                            </ui:repeat>
+                        </tbody>
+                    </table>
+                </h:form>
+            </ui:fragment>
+        </div>
+
+        <!-- history -->
+        <div class="panel">
+            <h2>היסטוריית השאלות</h2>
+
+            <h:outputText value="עדיין לא השאלת סרטים." rendered="#{empty myRentalsBean.history}"
+                          style="color:#5b6472;"/>
+
+            <ui:fragment rendered="#{not empty myRentalsBean.history}">
+                <table class="data">
+                    <thead>
+                        <tr>
+                            <th>סרט</th>
+                            <th>תאריך השאלה</th>
+                            <th>תאריך החזרה</th>
+                            <th>קנס איחור</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <ui:repeat value="#{myRentalsBean.history}" var="rental">
+                            <tr>
+                                <td>
+                                    <h:link outcome="/movie.xhtml" value="#{rental.movieTitle}">
+                                        <f:param name="id" value="#{rental.movieId}"/>
+                                    </h:link>
+                                </td>
+                                <td>
+                                    <h:outputText value="#{rental.rentedAt}">
+                                        <f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy"/>
+                                    </h:outputText>
+                                </td>
+                                <td>
+                                    <h:outputText value="#{rental.returnedAt}" rendered="#{not rental.open}">
+                                        <f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy"/>
+                                    </h:outputText>
+                                    <h:outputText value="טרם הוחזר" styleClass="badge badge-warn"
+                                                  rendered="#{rental.open}"/>
+                                </td>
+                                <td>
+                                    <h:outputText value="#{rental.lateFee} ש&quot;ח"
+                                                  rendered="#{not rental.open and rental.lateFee gt 0}"/>
+                                    <h:outputText value="—"
+                                                  rendered="#{rental.open or rental.lateFee le 0}"/>
+                                </td>
+                            </tr>
+                        </ui:repeat>
+                    </tbody>
+                </table>
+            </ui:fragment>
+        </div>
+
+    </ui:define>
+</ui:composition>

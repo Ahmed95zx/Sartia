@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Film detail: full information, availability, the rent action and reviews.
+
+  Reached by a bookmarkable URL (/movie.xhtml?id=3). The <f:viewParam> below
+  binds that query parameter to the bean and <f:viewAction> loads the title
+  before the page renders.
+-->
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                template="/WEB-INF/templates/layout.xhtml">
+
+    <!-- Declared as a direct child of the composition so Facelets relocates it
+         to the view root; the id parameter is bound before the page renders. -->
+    <f:metadata>
+        <f:viewParam name="id" value="#{movieBean.movieId}"/>
+        <f:viewAction action="#{movieBean.load}"/>
+    </f:metadata>
+
+    <ui:define name="title">#{movieBean.movie.title}</ui:define>
+
+    <ui:define name="content">
+
+        <ui:fragment rendered="#{empty movieBean.movie}">
+            <div class="panel empty-state">
+                <div class="big">הסרט לא נמצא</div>
+                <h:link outcome="/catalog.xhtml" value="חזרה לקטלוג" styleClass="btn"/>
+            </div>
+        </ui:fragment>
+
+        <ui:fragment rendered="#{not empty movieBean.movie}">
+
+            <h1 class="page-title">#{movieBean.movie.title}</h1>
+            <p class="page-subtitle">
+                #{movieBean.movie.categoryName}
+                <h:outputText value=" · #{movieBean.movie.releaseYear}"
+                              rendered="#{not empty movieBean.movie.releaseYear}"/>
+            </p>
+
+            <div class="layout-2col" style="grid-template-columns: 1fr 300px;">
+
+                <!-- details -->
+                <section>
+                    <div class="panel">
+                        <h2>אודות הסרט</h2>
+                        <p style="margin-top:0;">#{movieBean.movie.description}</p>
+
+                        <dl class="detail-grid">
+                            <dt>במאי</dt>
+                            <dd><h:outputText value="#{movieBean.movie.director}"/>
+                                <h:outputText value="—" rendered="#{empty movieBean.movie.director}"/></dd>
+
+                            <dt>שנת הוצאה</dt>
+                            <dd><h:outputText value="#{movieBean.movie.releaseYear}"/>
+                                <h:outputText value="—" rendered="#{empty movieBean.movie.releaseYear}"/></dd>
+
+                            <dt>אורך</dt>
+                            <dd><h:outputText value="#{movieBean.movie.durationMinutes} דקות"
+                                              rendered="#{not empty movieBean.movie.durationMinutes}"/>
+                                <h:outputText value="—" rendered="#{empty movieBean.movie.durationMinutes}"/></dd>
+
+                            <dt>קטגוריה</dt>
+                            <dd>#{movieBean.movie.categoryName}</dd>
+
+                            <dt>מחיר יומי</dt>
+                            <dd>
+                                <h:outputText value="#{movieBean.movie.dailyPrice}">
+                                    <f:convertNumber pattern="#,##0.00"/>
+                                </h:outputText> ש"ח
+                            </dd>
+
+                            <dt>דירוג</dt>
+                            <dd>
+                                <span class="rating">
+                                    <h:outputText value="★ #{movieBean.movie.formattedRating} מתוך 5"
+                                                  rendered="#{not empty movieBean.movie.averageRating}"/>
+                                </span>
+                                <h:outputText value="(#{movieBean.movie.reviewCount} ביקורות)"
+                                              rendered="#{not empty movieBean.movie.averageRating}"
+                                              style="color:#5b6472;font-size:.85rem;"/>
+                                <h:outputText value="טרם דורג"
+                                              rendered="#{empty movieBean.movie.averageRating}"/>
+                            </dd>
+                        </dl>
+                    </div>
+
+                    <!-- reviews -->
+                    <div class="panel">
+                        <h2>ביקורות</h2>
+
+                        <h:outputText value="עדיין אין ביקורות על סרט זה."
+                                      rendered="#{empty movieBean.reviews}"
+                                      style="color:#5b6472;"/>
+
+                        <ui:repeat value="#{movieBean.reviews}" var="review">
+                            <div class="review">
+                                <div class="head">
+                                    <span class="who">#{review.userFullName}</span>
+                                    <span class="rating">★ #{review.rating}</span>
+                                    <span class="when">
+                                        <h:outputText value="#{review.createdAt}">
+                                            <f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy"/>
+                                        </h:outputText>
+                                    </span>
+                                </div>
+                                <div class="body">#{review.comment}</div>
+                            </div>
+                        </ui:repeat>
+
+                        <!-- Only customers who rented the title may review it. -->
+                        <ui:fragment rendered="#{movieBean.mayReview}">
+                            <h:form styleClass="panel" style="margin-top:18px;box-shadow:none;background:#f5f7fa;">
+                                <h2 style="font-size:1rem;">הביקורת שלך</h2>
+
+                                <div class="field">
+                                    <label for="rating">דירוג</label>
+                                    <h:selectOneMenu id="rating" value="#{movieBean.rating}" style="max-width:180px;">
+                                        <f:selectItem itemValue="5" itemLabel="5 - מצוין"/>
+                                        <f:selectItem itemValue="4" itemLabel="4 - טוב מאוד"/>
+                                        <f:selectItem itemValue="3" itemLabel="3 - סביר"/>
+                                        <f:selectItem itemValue="2" itemLabel="2 - חלש"/>
+                                        <f:selectItem itemValue="1" itemLabel="1 - גרוע"/>
+                                    </h:selectOneMenu>
+                                </div>
+
+                                <div class="field">
+                                    <label for="comment">מה חשבת על הסרט?</label>
+                                    <h:inputTextarea id="comment" value="#{movieBean.comment}"/>
+                                </div>
+
+                                <h:commandButton value="שמירת ביקורת" action="#{movieBean.submitReview}"
+                                                 styleClass="btn"/>
+                            </h:form>
+                        </ui:fragment>
+                    </div>
+                </section>
+
+                <!-- availability / rent -->
+                <aside class="panel">
+                    <h2>זמינות</h2>
+
+                    <p>
+                        <h:outputText value="זמין להשאלה" styleClass="badge badge-ok"
+                                      rendered="#{movieBean.movie.available}"/>
+                        <h:outputText value="כל העותקים מושאלים" styleClass="badge badge-out"
+                                      rendered="#{not movieBean.movie.available}"/>
+                    </p>
+
+                    <dl class="detail-grid" style="grid-template-columns:1fr auto;">
+                        <dt>עותקים במלאי</dt>
+                        <dd>#{movieBean.movie.totalCopies}</dd>
+                        <dt>זמינים כעת</dt>
+                        <dd>#{movieBean.movie.availableCopies}</dd>
+                    </dl>
+
+                    <h:form style="margin-top:16px;">
+                        <ui:fragment rendered="#{userSession.loggedIn}">
+                            <h:commandButton value="השאלת הסרט" action="#{movieBean.rent}"
+                                             styleClass="btn" style="width:100%;"
+                                             disabled="#{not movieBean.canRent}"/>
+
+                            <ui:fragment rendered="#{not movieBean.canRent}">
+                                <p style="color:#5b6472;font-size:.83rem;margin-bottom:0;">
+                                    לא ניתן להשאיל כעת - ייתכן שכל העותקים מושאלים,
+                                    שהסרט כבר מושאל לך, או שהגעת למכסת ההשאלות.
+                                </p>
+                            </ui:fragment>
+                        </ui:fragment>
+
+                        <ui:fragment rendered="#{not userSession.loggedIn}">
+                            <p style="color:#5b6472;font-size:.88rem;">
+                                יש להתחבר כדי להשאיל סרטים.
+                            </p>
+                            <h:link outcome="/login.xhtml" value="כניסה למערכת"
+                                    styleClass="btn" style="width:100%;text-align:center;"/>
+                        </ui:fragment>
+                    </h:form>
+
+                    <p style="margin-top:18px;margin-bottom:0;">
+                        <h:link outcome="/catalog.xhtml" value="← חזרה לקטלוג"/>
+                    </p>
+                </aside>
+
+            </div>
+        </ui:fragment>
+
+    </ui:define>
+</ui:composition>

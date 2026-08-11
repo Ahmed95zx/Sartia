@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+                             https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+         version="6.0">
+
+  <display-name>Sartia - Video Rental System</display-name>
+
+  <!-- The Faces servlet. Mapped on *.xhtml so page URLs match the file that
+       renders them, which keeps bookmarks and the navigation rules readable. -->
+  <servlet>
+    <servlet-name>Faces Servlet</servlet-name>
+    <servlet-class>jakarta.faces.webapp.FacesServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>Faces Servlet</servlet-name>
+    <url-pattern>*.xhtml</url-pattern>
+  </servlet-mapping>
+
+  <welcome-file-list>
+    <welcome-file>catalog.xhtml</welcome-file>
+  </welcome-file-list>
+
+  <!-- Production stage: suppresses the framework's own debug output, which in
+       Development is appended to the rendered page. Switch to Development while
+       working on the views to get validation problems reported in the page. -->
+  <context-param>
+    <param-name>jakarta.faces.PROJECT_STAGE</param-name>
+    <param-value>Production</param-value>
+  </context-param>
+
+  <!-- Views are held in the session so @ViewScoped beans survive a postback.
+       Capped so a user opening many tabs cannot grow the session without limit. -->
+  <context-param>
+    <param-name>jakarta.faces.NUMBER_OF_VIEWS_IN_SESSION</param-name>
+    <param-value>15</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>jakarta.faces.FACELETS_SKIP_COMMENTS</param-name>
+    <param-value>true</param-value>
+  </context-param>
+
+  <session-config>
+    <session-timeout>30</session-timeout>
+    <cookie-config>
+      <!-- Blocks script access to the session cookie, so an injected script
+           cannot read it and hand the session to somebody else. -->
+      <http-only>true</http-only>
+    </cookie-config>
+    <tracking-mode>COOKIE</tracking-mode>
+  </session-config>
+
+  <error-page>
+    <error-code>404</error-code>
+    <location>/error.xhtml</location>
+  </error-page>
+
+  <error-page>
+    <error-code>403</error-code>
+    <location>/error.xhtml</location>
+  </error-page>
+
+  <error-page>
+    <exception-type>java.lang.Throwable</exception-type>
+    <location>/error.xhtml</location>
+  </error-page>
+
+</web-app>

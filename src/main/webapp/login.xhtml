@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Login. The returnTo parameter is set by AuthFilter when it intercepts a
+  request for a protected page, so the user lands where they were going
+  instead of being dumped on the home page.
+-->
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                template="/WEB-INF/templates/layout.xhtml">
+
+    <f:metadata>
+        <f:viewParam name="returnTo" value="#{loginBean.returnTo}"/>
+    </f:metadata>
+
+    <ui:define name="title">כניסה למערכת</ui:define>
+
+    <ui:define name="content">
+
+        <div class="narrow">
+            <div class="panel">
+                <h1 class="page-title" style="font-size:1.35rem;">כניסה למערכת</h1>
+                <p class="page-subtitle">יש להזין שם משתמש וסיסמה</p>
+
+                <h:form id="loginForm">
+                    <!-- The page is reached by a redirect carrying ?returnTo=...,
+                         which f:viewParam binds to the bean as the page renders.
+                         The form posts back to a plain URL with no query string,
+                         so the value is carried across the POST in this hidden
+                         field: the bean is @RequestScoped, and a new instance
+                         serves the POST. Round-tripping it explicitly keeps the
+                         behaviour independent of how view state is stored. -->
+                    <h:inputHidden id="returnTo" value="#{loginBean.returnTo}"/>
+
+                    <div class="field">
+                        <label for="loginForm:username">שם משתמש</label>
+                        <h:inputText id="username" value="#{loginBean.username}" required="true"
+                                     requiredMessage="יש להזין שם משתמש"/>
+                        <h:message for="username" styleClass="field-error"/>
+                    </div>
+
+                    <div class="field">
+                        <label for="loginForm:password">סיסמה</label>
+                        <h:inputSecret id="password" value="#{loginBean.password}" required="true"
+                                       requiredMessage="יש להזין סיסמה"/>
+                        <h:message for="password" styleClass="field-error"/>
+                    </div>
+
+                    <div class="form-actions">
+                        <!-- Explicit id: without one JSF generates j_idtNN, which
+                             shifts whenever a component is added above it. -->
+                        <h:commandButton id="submit" value="כניסה"
+                                         action="#{loginBean.login}" styleClass="btn"/>
+                        <h:link outcome="/register.xhtml" value="הרשמה" styleClass="btn btn-secondary"/>
+                    </div>
+                </h:form>
+
+                <!-- Demo credentials, shown deliberately so the system can be
+                     assessed without first creating an account. A production
+                     deployment would drop this block. -->
+                <div style="margin-top:22px;padding-top:16px;border-top:1px solid #e2e6ec;
+                            font-size:.83rem;color:#5b6472;">
+                    <strong>משתמשי הדגמה:</strong><br/>
+                    מנהל — admin / admin123<br/>
+                    לקוח — david / david123
+                </div>
+            </div>
+        </div>
+
+    </ui:define>
+</ui:composition>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Administrator loans screen: everything currently out, overdue items first,
+  with actions to take a disc back or write it off.
+  Protected by AuthFilter (ADMIN role required).
+-->
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="title">השאלות פתוחות</ui:define>
+
+    <ui:define name="content">
+
+        <h1 class="page-title">השאלות פתוחות</h1>
+        <p class="page-subtitle">מעקב אחר סרטים שהושאלו וטיפול בהחזרות</p>
+
+        <div class="stat-row">
+            <div class="stat">
+                <div class="n">#{returnsBean.openRentals.size()}</div>
+                <div class="l">השאלות פתוחות</div>
+            </div>
+            <div class="stat #{returnsBean.overdueCount gt 0 ? 'alert' : ''}">
+                <div class="n">#{returnsBean.overdueCount}</div>
+                <div class="l">באיחור</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>כל ההשאלות הפתוחות</h2>
+
+            <ui:fragment rendered="#{empty returnsBean.openRentals}">
+                <div class="empty-state">
+                    <div class="big">אין השאלות פתוחות</div>
+                    <div>כל העותקים נמצאים במלאי.</div>
+                </div>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{not empty returnsBean.openRentals}">
+                <h:form>
+                    <table class="data">
+                        <thead>
+                            <tr>
+                                <th>סרט</th>
+                                <th>ברקוד</th>
+                                <th>לקוח</th>
+                                <th>תאריך השאלה</th>
+                                <th>להחזרה עד</th>
+                                <th>סטטוס</th>
+                                <th>קנס</th>
+                                <th>פעולות</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <ui:repeat value="#{returnsBean.openRentals}" var="rental">
+                                <tr class="#{rental.overdue ? 'row-overdue' : ''}">
+                                    <td>
+                                        <h:link outcome="/movie.xhtml" value="#{rental.movieTitle}">
+                                            <f:param name="id" value="#{rental.movieId}"/>
+                                        </h:link>
+                                    </td>
+                                    <td>#{rental.barcode}</td>
+                                    <td>
+                                        #{rental.userFullName}
+                                        <div style="font-size:.78rem;color:#5b6472;">#{rental.username}</div>
+                                    </td>
+                                    <td>
+                                        <h:outputText value="#{rental.rentedAt}">
+                                            <f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy"/>
+                                        </h:outputText>
+                                    </td>
+                                    <td>
+                                        <h:outputText value="#{rental.dueDate}">
+                                            <f:convertDateTime type="localDate" pattern="dd/MM/yyyy"/>
+                                        </h:outputText>
+                                    </td>
+                                    <td>
+                                        <h:outputText value="באיחור #{rental.daysOverdue} ימים"
+                                                      styleClass="badge badge-out"
+                                                      rendered="#{rental.overdue}"/>
+                                        <h:outputText value="בתוקף" styleClass="badge badge-ok"
+                                                      rendered="#{not rental.overdue}"/>
+                                    </td>
+                                    <td>
+                                        <h:outputText value="#{rental.projectedLateFee} ש&quot;ח"
+                                                      rendered="#{rental.overdue}"
+                                                      style="color:#b3261e;font-weight:600;"/>
+                                        <h:outputText value="—" rendered="#{not rental.overdue}"/>
+                                    </td>
+                                    <td style="white-space:nowrap;">
+                                        <h:commandButton value="החזרה"
+                                                         action="#{returnsBean.processReturn(rental)}"
+                                                         styleClass="btn btn-sm"/>
+                                        <h:commandButton value="סימון כאבוד"
+                                                         action="#{returnsBean.markLost(rental)}"
+                                                         styleClass="btn btn-danger btn-sm"
+                                                         onclick="return confirm('לסמן את העותק כאבוד?');"/>
+                                    </td>
+                                </tr>
+                            </ui:repeat>
+                        </tbody>
+                    </table>
+                </h:form>
+            </ui:fragment>
+        </div>
+
+    </ui:define>
+</ui:composition>

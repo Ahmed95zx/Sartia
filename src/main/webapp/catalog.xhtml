@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The catalogue: category sidebar, keyword search, filters, results grid, paging.
+  Open to everyone - browsing does not require an account, only renting does.
+-->
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:a="jakarta.faces.passthrough"
+                template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="title">קטלוג הסרטים</ui:define>
+
+    <ui:define name="content">
+
+        <h1 class="page-title">קטלוג הסרטים</h1>
+        <p class="page-subtitle">
+            <h:outputText value="קטגוריה: #{catalogBean.activeCategoryName}"
+                          rendered="#{not empty catalogBean.activeCategoryName}"/>
+            <h:outputText value="עיון וחיפוש במאגר הסרטים"
+                          rendered="#{empty catalogBean.activeCategoryName}"/>
+        </p>
+
+        <div class="layout-2col">
+
+            <!-- categories -->
+            <aside class="panel">
+                <h2>קטגוריות</h2>
+                <h:form id="catForm">
+                    <ul class="cat-list">
+                        <li>
+                            <h:commandLink styleClass="lnk #{empty catalogBean.criteria.categoryId ? 'active' : ''}"
+                                           action="#{catalogBean.filterByCategory(null)}">
+                                <span>הכול</span>
+                            </h:commandLink>
+                        </li>
+                        <ui:repeat value="#{catalogBean.categories}" var="cat">
+                            <li>
+                                <h:commandLink styleClass="lnk #{catalogBean.criteria.categoryId eq cat.id ? 'active' : ''}"
+                                               action="#{catalogBean.filterByCategory(cat.id)}">
+                                    <span>#{cat.name}</span>
+                                    <span class="count">#{cat.movieCount}</span>
+                                </h:commandLink>
+                            </li>
+                        </ui:repeat>
+                    </ul>
+                </h:form>
+            </aside>
+
+            <!-- results -->
+            <section>
+
+                <div class="panel">
+                    <h:form id="searchForm">
+                        <div class="toolbar">
+                            <div class="grow">
+                                <label for="searchForm:q">חיפוש חופשי</label>
+                                <h:inputText id="q" value="#{catalogBean.criteria.keyword}"
+                                             a:placeholder="שם סרט, במאי או מילה מהתקציר"/>
+                            </div>
+
+                            <div>
+                                <label for="searchForm:sort">מיון</label>
+                                <h:selectOneMenu id="sort" value="#{catalogBean.criteria.sortBy}">
+                                    <f:selectItem itemValue="TITLE"  itemLabel="שם"/>
+                                    <f:selectItem itemValue="YEAR"   itemLabel="שנה"/>
+                                    <f:selectItem itemValue="RATING" itemLabel="דירוג"/>
+                                    <f:selectItem itemValue="NEWEST" itemLabel="נוסף לאחרונה"/>
+                                </h:selectOneMenu>
+                            </div>
+
+                            <div style="flex:0 0 auto;">
+                                <label>&#160;</label>
+                                <label style="font-weight:400;font-size:.88rem;white-space:nowrap;">
+                                    <h:selectBooleanCheckbox value="#{catalogBean.criteria.onlyAvailable}"
+                                                             style="width:auto;margin-inline-end:6px;"/>
+                                    רק זמינים
+                                </label>
+                            </div>
+
+                            <div style="flex:0 0 auto;">
+                                <h:commandButton value="חפש" action="#{catalogBean.search}" styleClass="btn"/>
+                            </div>
+                            <div style="flex:0 0 auto;">
+                                <h:commandButton value="נקה" action="#{catalogBean.clearFilters}"
+                                                 styleClass="btn btn-secondary" immediate="true"/>
+                            </div>
+                        </div>
+                    </h:form>
+                </div>
+
+                <!-- no results -->
+                <ui:fragment rendered="#{empty catalogBean.result.movies}">
+                    <div class="panel empty-state">
+                        <div class="big">לא נמצאו סרטים</div>
+                        <div>כדאי לנסות מונח חיפוש אחר או לנקות את הסינון.</div>
+                    </div>
+                </ui:fragment>
+
+                <!-- results -->
+                <ui:fragment rendered="#{not empty catalogBean.result.movies}">
+                    <div class="movie-grid">
+                        <ui:repeat value="#{catalogBean.result.movies}" var="movie">
+                            <article class="movie-card">
+                                <div class="title">
+                                    <h:link outcome="/movie.xhtml" value="#{movie.title}">
+                                        <f:param name="id" value="#{movie.id}"/>
+                                    </h:link>
+                                </div>
+
+                                <div class="meta">
+                                    <h:outputText value="#{movie.releaseYear}"
+                                                  rendered="#{not empty movie.releaseYear}"/>
+                                    <h:outputText value=" · " rendered="#{not empty movie.releaseYear}"/>
+                                    #{movie.categoryName}
+                                </div>
+
+                                <div class="meta" style="font-size:.8rem;">
+                                    <h:outputText value="בימוי: #{movie.director}"
+                                                  rendered="#{not empty movie.director}"/>
+                                </div>
+
+                                <div class="synopsis">#{movie.description}</div>
+
+                                <div class="meta">
+                                    <span class="rating" title="דירוג ממוצע">
+                                        <h:outputText value="★ #{movie.formattedRating} (#{movie.reviewCount})"
+                                                      rendered="#{not empty movie.averageRating}"/>
+                                    </span>
+                                    <h:outputText value="טרם דורג" rendered="#{empty movie.averageRating}"
+                                                  style="font-size:.8rem;"/>
+                                </div>
+
+                                <div class="card-foot">
+                                    <h:outputText value="זמין (#{movie.availableCopies})"
+                                                  styleClass="badge badge-ok"
+                                                  rendered="#{movie.available}"/>
+                                    <h:outputText value="הכול מושאל"
+                                                  styleClass="badge badge-out"
+                                                  rendered="#{not movie.available}"/>
+
+                                    <h:link outcome="/movie.xhtml" value="פרטים" styleClass="btn btn-secondary btn-sm">
+                                        <f:param name="id" value="#{movie.id}"/>
+                                    </h:link>
+                                </div>
+                            </article>
+                        </ui:repeat>
+                    </div>
+
+                    <!-- paging -->
+                    <h:form>
+                        <div class="pager">
+                            <h:commandButton value="הקודם" action="#{catalogBean.previousPage}"
+                                             styleClass="btn btn-secondary btn-sm"
+                                             disabled="#{not catalogBean.result.hasPrevious}"/>
+
+                            <span class="info">
+                                עמוד #{catalogBean.result.page} מתוך #{catalogBean.result.totalPages}
+                                · #{catalogBean.result.totalCount} סרטים
+                            </span>
+
+                            <h:commandButton value="הבא" action="#{catalogBean.nextPage}"
+                                             styleClass="btn btn-secondary btn-sm"
+                                             disabled="#{not catalogBean.result.hasNext}"/>
+                        </div>
+                    </h:form>
+                </ui:fragment>
+
+            </section>
+        </div>
+
+    </ui:define>
+</ui:composition>

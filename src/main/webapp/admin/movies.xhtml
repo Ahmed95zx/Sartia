@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Administrator catalogue management: add, edit and remove titles, and stock
+  additional copies. Protected by AuthFilter (ADMIN role required).
+-->
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="title">ניהול קטלוג</ui:define>
+
+    <ui:define name="content">
+
+        <h1 class="page-title">ניהול קטלוג</h1>
+        <p class="page-subtitle">הוספה, עריכה ומחיקה של סרטים וניהול מלאי העותקים</p>
+
+        <!-- editor -->
+        <ui:fragment rendered="#{movieAdminBean.editorOpen}">
+            <div class="panel">
+                <h2>
+                    <h:outputText value="הוספת סרט חדש" rendered="#{movieAdminBean.editing.id eq 0}"/>
+                    <h:outputText value="עריכת סרט" rendered="#{movieAdminBean.editing.id ne 0}"/>
+                </h2>
+
+                <h:form id="editForm">
+                    <div class="form-row">
+                        <div class="field">
+                            <label for="editForm:title">שם הסרט</label>
+                            <h:inputText id="title" value="#{movieAdminBean.editing.title}" required="true"
+                                         requiredMessage="יש להזין שם סרט"/>
+                            <h:message for="title" styleClass="field-error"/>
+                        </div>
+
+                        <div class="field">
+                            <label for="editForm:category">קטגוריה</label>
+                            <h:selectOneMenu id="category" value="#{movieAdminBean.editing.categoryId}">
+                                <f:selectItems value="#{movieAdminBean.categories}" var="cat"
+                                               itemValue="#{cat.id}" itemLabel="#{cat.name}"/>
+                            </h:selectOneMenu>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="editForm:description">תקציר</label>
+                        <h:inputTextarea id="description" value="#{movieAdminBean.editing.description}"/>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="field">
+                            <label for="editForm:director">במאי</label>
+                            <h:inputText id="director" value="#{movieAdminBean.editing.director}"/>
+                        </div>
+
+                        <div class="field">
+                            <label for="editForm:year">שנת הוצאה</label>
+                            <h:inputText id="year" value="#{movieAdminBean.editing.releaseYear}"
+                                         converterMessage="שנה חייבת להיות מספר"/>
+                            <h:message for="year" styleClass="field-error"/>
+                        </div>
+
+                        <div class="field">
+                            <label for="editForm:duration">אורך (דקות)</label>
+                            <h:inputText id="duration" value="#{movieAdminBean.editing.durationMinutes}"
+                                         converterMessage="אורך חייב להיות מספר"/>
+                            <h:message for="duration" styleClass="field-error"/>
+                        </div>
+
+                        <div class="field">
+                            <label for="editForm:price">מחיר יומי</label>
+                            <h:inputText id="price" value="#{movieAdminBean.editing.dailyPrice}"
+                                         converterMessage="מחיר חייב להיות מספר"/>
+                            <h:message for="price" styleClass="field-error"/>
+                        </div>
+                    </div>
+
+                    <!-- Only meaningful when creating: an existing title's copies
+                         are managed from the inventory panel instead. -->
+                    <ui:fragment rendered="#{movieAdminBean.editing.id eq 0}">
+                        <div class="field" style="max-width:220px;">
+                            <label for="editForm:copies">מספר עותקים ראשוני</label>
+                            <h:inputText id="copies" value="#{movieAdminBean.initialCopies}"/>
+                        </div>
+                    </ui:fragment>
+
+                    <div class="form-actions">
+                        <h:commandButton value="שמירה" action="#{movieAdminBean.save}" styleClass="btn"/>
+                        <h:commandButton value="ביטול" action="#{movieAdminBean.cancelEdit}"
+                                         styleClass="btn btn-secondary" immediate="true"/>
+                    </div>
+                </h:form>
+            </div>
+        </ui:fragment>
+
+        <!-- inventory panel -->
+        <ui:fragment rendered="#{movieAdminBean.inventoryMovieId ne 0}">
+            <div class="panel">
+                <h2>מלאי עותקים</h2>
+
+                <table class="data" style="margin-bottom:16px;">
+                    <thead>
+                        <tr>
+                            <th>ברקוד</th>
+                            <th>סטטוס</th>
+                            <th>נוסף בתאריך</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <ui:repeat value="#{movieAdminBean.inventory}" var="copy">
+                            <tr>
+                                <td>#{copy.barcode}</td>
+                                <td>
+                                    <h:outputText value="#{copy.status.hebrewLabel}"
+                                                  styleClass="badge #{copy.status eq 'AVAILABLE' ? 'badge-ok'
+                                                                     : (copy.status eq 'RENTED' ? 'badge-warn' : 'badge-out')}"/>
+                                </td>
+                                <td>
+                                    <h:outputText value="#{copy.acquiredAt}">
+                                        <f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy"/>
+                                    </h:outputText>
+                                </td>
+                            </tr>
+                        </ui:repeat>
+                    </tbody>
+                </table>
+
+                <h:form>
+                    <div class="toolbar">
+                        <div style="flex:0 0 auto;">
+                            <label for="addCopies">עותקים להוספה</label>
+                            <h:inputText id="addCopies" value="#{movieAdminBean.copiesToAdd}"
+                                         style="width:90px;"/>
+                        </div>
+                        <div style="flex:0 0 auto;">
+                            <h:commandButton value="הוספת עותקים" action="#{movieAdminBean.addCopies}"
+                                             styleClass="btn"/>
+                        </div>
+                        <div style="flex:0 0 auto;">
+                            <h:commandButton value="סגירה" action="#{movieAdminBean.closeInventory}"
+                                             styleClass="btn btn-secondary"/>
+                        </div>
+                    </div>
+                </h:form>
+            </div>
+        </ui:fragment>
+
+        <!-- catalogue table -->
+        <div class="panel">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                <h2 style="margin:0;">סרטים בקטלוג (#{movieAdminBean.movies.size()})</h2>
+                <h:form>
+                    <h:commandButton value="הוספת סרט חדש" action="#{movieAdminBean.newMovie}" styleClass="btn"/>
+                </h:form>
+            </div>
+
+            <h:form>
+                <table class="data">
+                    <thead>
+                        <tr>
+                            <th>שם</th>
+                            <th>קטגוריה</th>
+                            <th>שנה</th>
+                            <th>עותקים</th>
+                            <th>זמינים</th>
+                            <th>דירוג</th>
+                            <th>פעולות</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <ui:repeat value="#{movieAdminBean.movies}" var="movie">
+                            <tr>
+                                <td>
+                                    <h:link outcome="/movie.xhtml" value="#{movie.title}">
+                                        <f:param name="id" value="#{movie.id}"/>
+                                    </h:link>
+                                </td>
+                                <td>#{movie.categoryName}</td>
+                                <td>#{movie.releaseYear}</td>
+                                <td>#{movie.totalCopies}</td>
+                                <td>
+                                    <h:outputText value="#{movie.availableCopies}"
+                                                  styleClass="badge #{movie.available ? 'badge-ok' : 'badge-out'}"/>
+                                </td>
+                                <td>
+                                    <h:outputText value="★ #{movie.formattedRating}"
+                                                  rendered="#{not empty movie.averageRating}"
+                                                  styleClass="rating"/>
+                                    <h:outputText value="—" rendered="#{empty movie.averageRating}"/>
+                                </td>
+                                <td style="white-space:nowrap;">
+                                    <h:commandButton value="עריכה" action="#{movieAdminBean.edit(movie)}"
+                                                     styleClass="btn btn-secondary btn-sm"/>
+                                    <h:commandButton value="מלאי" action="#{movieAdminBean.showInventory(movie)}"
+                                                     styleClass="btn btn-secondary btn-sm"/>
+                                    <h:commandButton value="מחיקה" action="#{movieAdminBean.delete(movie)}"
+                                                     styleClass="btn btn-danger btn-sm"
+                                                     onclick="return confirm('למחוק את הסרט לצמיתות?');"/>
+                                </td>
+                            </tr>
+                        </ui:repeat>
+                    </tbody>
+                </table>
+            </h:form>
+        </div>
+
+    </ui:define>
+</ui:composition>
