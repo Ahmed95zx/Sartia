@@ -15,3 +15,6 @@ Thumbs.db
 
 # Course reference material (not part of the submission)
 reference/
+
+# Temporary session handoff note (not part of the submission)
+HANDOFF.md
