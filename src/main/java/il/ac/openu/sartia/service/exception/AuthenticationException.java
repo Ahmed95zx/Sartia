@@ -16,6 +16,6 @@ public class AuthenticationException extends BusinessException {
     }
 
     public static AuthenticationException badCredentials() {
-        return new AuthenticationException("שם משתמש או סיסמה שגויים");
+        return new AuthenticationException("Incorrect username or password");
     }
 }

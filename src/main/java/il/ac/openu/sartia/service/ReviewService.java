@@ -32,15 +32,15 @@ public class ReviewService {
      */
     public void submit(long movieId, long userId, int rating, String comment) {
         if (rating < 1 || rating > 5) {
-            throw new ValidationException("הדירוג חייב להיות בין 1 ל-5");
+            throw new ValidationException("The rating must be between 1 and 5");
         }
         if (comment != null && comment.length() > MAX_COMMENT_LENGTH) {
-            throw new ValidationException("תוכן הביקורת ארוך מדי (עד " + MAX_COMMENT_LENGTH + " תווים)");
+            throw new ValidationException("The review is too long (up to " + MAX_COMMENT_LENGTH + " characters)");
         }
 
         Database.runInTransaction(connection -> {
             if (!rentalDao.hasEverRentedMovie(connection, userId, movieId)) {
-                throw new ConflictException("ניתן לכתוב ביקורת רק על סרט שהושאל בעבר");
+                throw new ConflictException("You may only review a film you have rented");
             }
 
             Review review = new Review();

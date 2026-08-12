@@ -70,13 +70,13 @@ code=$(curl -s -o "$WORK/movies.json" -w '%{http_code}' "$BASE/api/movies?size=5
 check "GET /api/movies" "200" "$code"
 contains "results are paged" "$WORK/movies.json" "totalPages"
 
-# Percent-encoded UTF-8 for "מטריקס" - passed pre-encoded so the shell cannot
-# mangle the term before curl sends it.
-curl -s "$BASE/api/movies?q=%D7%9E%D7%98%D7%A8%D7%99%D7%A7%D7%A1" -o "$WORK/search.json"
+# Lower-case and mid-word on purpose: it proves the search is a case-insensitive
+# substring match rather than a whole-word or prefix match.
+curl -s "$BASE/api/movies?q=atrix" -o "$WORK/search.json"
 if grep -q '"totalItems":0' "$WORK/search.json"; then
-    fail "Hebrew keyword search finds a match"
+    fail "keyword search matches inside a word"
 else
-    pass "Hebrew keyword search finds a match"
+    pass "keyword search matches inside a word"
 fi
 
 code=$(curl -s -o /dev/null -w '%{http_code}' "$BASE/api/movies/999999")
@@ -111,7 +111,7 @@ contains "customer is signed in" "$WORK/after-login.html" "my-rentals"
 
 code=$(curl -s -b "$JAR" -o "$WORK/rentals.html" -w '%{http_code}' "$BASE/my-rentals.xhtml")
 check "my-rentals reachable once signed in" "200" "$code"
-contains "rental history is shown" "$WORK/rentals.html" "היסטוריית השאלות"
+contains "rental history is shown" "$WORK/rentals.html" "Rental history"
 
 # ---------------------------------------------------------------- admin flow
 echo
@@ -137,7 +137,7 @@ check "catalogue management reachable" "200" "$code"
 
 code=$(curl -s -b "$AJAR" -o "$WORK/admin-returns.html" -w '%{http_code}' "$BASE/admin/returns.xhtml")
 check "loans screen reachable" "200" "$code"
-contains "open loans are listed" "$WORK/admin-returns.html" "השאלות פתוחות"
+contains "open loans are listed" "$WORK/admin-returns.html" "Open Rentals"
 
 # ---------------------------------------------------------------- wrong password
 echo

@@ -75,10 +75,10 @@ public class MovieAdminBean implements Serializable {
         try {
             if (editing.getId() == 0) {
                 catalogService.createMovie(editing, initialCopies);
-                info("הסרט \"" + editing.getTitle() + "\" נוסף עם " + initialCopies + " עותקים");
+                info("\"" + editing.getTitle() + "\" was added with " + initialCopies + " copies");
             } else {
                 catalogService.updateMovie(editing);
-                info("הסרט \"" + editing.getTitle() + "\" עודכן");
+                info("\"" + editing.getTitle() + "\" was updated");
             }
             editorOpen = false;
             editing = new Movie();
@@ -91,7 +91,7 @@ public class MovieAdminBean implements Serializable {
     public void delete(Movie movie) {
         try {
             catalogService.deleteMovie(movie.getId());
-            info("הסרט \"" + movie.getTitle() + "\" נמחק");
+            info("\"" + movie.getTitle() + "\" was deleted");
             reload();
         } catch (BusinessException failure) {
             error(failure.getMessage());
@@ -114,7 +114,7 @@ public class MovieAdminBean implements Serializable {
     public void addCopies() {
         try {
             catalogService.addCopies(inventoryMovieId, copiesToAdd);
-            info("נוספו " + copiesToAdd + " עותקים");
+            info(copiesToAdd + " copies were added");
             inventory = catalogService.copiesOf(inventoryMovieId);
             reload();
         } catch (BusinessException failure) {

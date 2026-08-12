@@ -31,14 +31,14 @@ public class RegisterBean {
      */
     public String register() {
         if (password == null || !password.equals(passwordConfirm)) {
-            Messages.error("הסיסמאות אינן תואמות");
+            Messages.error("The passwords do not match");
             return null;
         }
 
         try {
             User created = userService.register(username, password, email, fullName, phone);
             session.login(created);
-            Messages.info("ההרשמה הושלמה. ברוך הבא, " + created.getFullName());
+            Messages.info("Registration complete. Welcome, " + created.getFullName());
             return "/catalog.xhtml?faces-redirect=true";
         } catch (BusinessException failure) {
             Messages.error(failure.getMessage());

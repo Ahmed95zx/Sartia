@@ -8,6 +8,11 @@
 --  mint new ones:
 --      java -cp target/classes il.ac.openu.sartia.util.Passwords <password>
 --
+--  Cover images are stored under src/main/webapp/images/covers and are
+--  referenced by an application-relative path, so the catalogue renders
+--  with no network connection. cover_url also accepts a full external
+--  URL if a title is maintained that way instead.
+--
 --  Demo accounts
 --  -------------
 --      admin / admin123   (administrator)
@@ -32,75 +37,75 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- ---------------------------------------------------------------------
 INSERT INTO users (id, username, password_hash, email, full_name, phone, role) VALUES
  (1, 'admin', '210000:t4Yp3elTM1vCsm5U/52Uew==:G57IpiiF6OLC1zW8Eoc6daeaUG+JC218x4ezdqZ+Rek=',
-     'admin@sartia.co.il',  'מנהל המערכת', '03-5555555', 'ADMIN'),
+     'admin@sartia.co.il',  'System Administrator', '03-5555555', 'ADMIN'),
  (2, 'david', '210000:IImw9y8E76IwAiEGvpIxMQ==:+4OLVh5dvDOSpIVl5EXUN1uDh4M1NSQZ3w9cZUhq9Sc=',
-     'david@example.com',   'דוד כהן',     '052-1234567', 'CUSTOMER'),
+     'david@example.com',   'David Cohen',          '052-1234567', 'CUSTOMER'),
  (3, 'noa',   '210000:h1HLfjSWTjX0wILDaI1Vmg==:65YQidWEz2T1ay9Hqym2PUc6oB5Oa9tBf2zg9U1cw6A=',
-     'noa@example.com',     'נועה לוי',    '054-7654321', 'CUSTOMER');
+     'noa@example.com',     'Noa Levi',             '054-7654321', 'CUSTOMER');
 
 
 -- ---------------------------------------------------------------------
 -- Categories
 -- ---------------------------------------------------------------------
 INSERT INTO categories (id, name, description) VALUES
- (1, 'אקשן',      'סרטי פעולה, מתח ומרדפים'),
- (2, 'קומדיה',    'סרטים קלילים ומצחיקים'),
- (3, 'דרמה',      'סרטי עלילה ורגש'),
- (4, 'מדע בדיוני','עתידנות, חלל וטכנולוגיה'),
- (5, 'אנימציה',   'סרטי הנפשה למשפחה'),
- (6, 'אימה',      'סרטי מתח ואימה'),
- (7, 'תעודי',     'סרטים דוקומנטריים');
+ (1, 'Action',          'Action, thrillers and chases'),
+ (2, 'Comedy',          'Light-hearted and funny films'),
+ (3, 'Drama',           'Story-driven and emotional films'),
+ (4, 'Science Fiction', 'The future, space and technology'),
+ (5, 'Animation',       'Animated films for the whole family'),
+ (6, 'Horror',          'Suspense and horror'),
+ (7, 'Documentary',     'Documentary films');
 
 
 -- ---------------------------------------------------------------------
 -- Movies
 -- ---------------------------------------------------------------------
-INSERT INTO movies (id, title, description, director, release_year, duration_min, category_id, daily_price) VALUES
- (1,  'המטריקס',
-      'האקר מגלה שהמציאות שהוא מכיר היא סימולציה, ומצטרף למרד נגד המכונות ששולטות באנושות.',
-      'האחיות ואצ''ובסקי', 1999, 136, 4, 6.00),
- (2,  'בלייד ראנר 2049',
-      'שוטר צעיר חושף סוד קבור שעלול לשנות את מה שנותר מהחברה האנושית.',
-      'דני וילנב', 2017, 164, 4, 7.00),
- (3,  'האביר האפל',
-      'באטמן מתמודד עם הג''וקר, פושע כאוטי שמאיים לשתק את גות''אם סיטי.',
-      'כריסטופר נולאן', 2008, 152, 1, 6.50),
- (4,  'מקס הזועם: כביש הזעם',
-      'מרדף בלתי פוסק במדבר פוסט-אפוקליפטי, בניסיון להימלט ממצביא אכזר.',
-      'ג''ורג'' מילר', 2015, 120, 1, 6.00),
- (5,  'משחק ההעתקה',
-      'אלן טיורינג מוביל את הצוות שפיצח את צופן האניגמה במלחמת העולם השנייה.',
-      'מורטן טילדום', 2014, 114, 3, 5.50),
- (6,  'פורסט גאמפ',
-      'אדם תמים חוצה עשורים של היסטוריה אמריקאית מבלי להתכוון לכך.',
-      'רוברט זמקיס', 1994, 142, 3, 5.00),
- (7,  'הגראנד בודפשט הוטל',
-      'קונסיירז'' אגדי ושוליה נקלעים לפרשת רצח וירושה באירופה שבין המלחמות.',
-      'וס אנדרסון', 2014, 99, 2, 5.50),
- (8,  'סופרבד',
-      'שני חברים מנסים לשרוד את הלילה האחרון של התיכון.',
-      'גרג מוטולה', 2007, 113, 2, 4.50),
- (9,  'מעלה הרוח',
-      'ילדה נלכדת בעולם רוחות ונאבקת להציל את הוריה ולחזור הביתה.',
-      'האיאו מיאזאקי', 2001, 125, 5, 5.50),
- (10, 'מפלצות בע"מ',
-      'שתי מפלצות מגלות ילדה אנושית ומגלים שכל מה שלימדו אותם היה שגוי.',
-      'פיט דוקטר', 2001, 92, 5, 5.00),
- (11, 'תפוס אותי אם תוכל',
-      'נוכל צעיר מתחזה לטייס, לרופא ולעורך דין בעוד סוכן FBI במרדף אחריו.',
-      'סטיבן ספילברג', 2002, 141, 3, 5.00),
- (12, 'קלטת',
-      'עיתונאית חוקרת קלטת וידאו מקוללת שהצופים בה מתים כעבור שבוע.',
-      'גור ורבינסקי', 2002, 115, 6, 5.50),
- (13, 'הבריחה משוושנק',
-      'בנקאי שהורשע ברצח שלא ביצע בונה במשך שנים את דרכו לחופש.',
-      'פרנק דארבונט', 1994, 142, 3, 6.00),
- (14, 'כוכב הקופים: המרד',
-      'קופים בעלי תבונה מתעמתים עם שרידי האנושות על השליטה בכדור הארץ.',
-      'מאט ריבס', 2014, 130, 4, 5.50),
- (15, 'הליכה על חבל',
-      'תיעוד המסע של אמן חבל מתוח בדרך למתיחת חבל בין מגדלי התאומים.',
-      'ג''יימס מארש', 2008, 94, 7, 4.50);
+INSERT INTO movies (id, title, description, director, release_year, duration_min, category_id, cover_url, daily_price) VALUES
+ (1,  'The Matrix',
+      'A hacker discovers that the reality he knows is a simulation, and joins a rebellion against the machines that rule humanity.',
+      'Lana and Lilly Wachowski', 1999, 136, 4, '/images/covers/1.jpg', 6.00),
+ (2,  'Blade Runner 2049',
+      'A young officer uncovers a buried secret that could change what remains of human society.',
+      'Denis Villeneuve', 2017, 164, 4, '/images/covers/2.jpg', 7.00),
+ (3,  'The Dark Knight',
+      'Batman faces the Joker, a chaotic criminal who threatens to bring Gotham City to a standstill.',
+      'Christopher Nolan', 2008, 152, 1, '/images/covers/3.jpg', 6.50),
+ (4,  'Mad Max: Fury Road',
+      'A relentless chase across a post-apocalyptic desert, in a bid to escape a brutal warlord.',
+      'George Miller', 2015, 120, 1, '/images/covers/4.jpg', 6.00),
+ (5,  'The Imitation Game',
+      'Alan Turing leads the team that cracked the Enigma code during the Second World War.',
+      'Morten Tyldum', 2014, 114, 3, '/images/covers/5.jpg', 5.50),
+ (6,  'Forrest Gump',
+      'A simple man crosses decades of American history without ever meaning to.',
+      'Robert Zemeckis', 1994, 142, 3, '/images/covers/6.jpg', 5.00),
+ (7,  'The Grand Budapest Hotel',
+      'A legendary concierge and his protege are caught up in a murder and a disputed inheritance in interwar Europe.',
+      'Wes Anderson', 2014, 99, 2, '/images/covers/7.jpg', 5.50),
+ (8,  'Superbad',
+      'Two friends try to survive the last night of high school.',
+      'Greg Mottola', 2007, 113, 2, '/images/covers/8.jpg', 4.50),
+ (9,  'Spirited Away',
+      'A girl is trapped in a world of spirits and struggles to save her parents and find her way home.',
+      'Hayao Miyazaki', 2001, 125, 5, '/images/covers/9.jpg', 5.50),
+ (10, 'Monsters, Inc.',
+      'Two monsters discover a human child and learn that everything they were taught was wrong.',
+      'Pete Docter', 2001, 92, 5, '/images/covers/10.jpg', 5.00),
+ (11, 'Catch Me If You Can',
+      'A young con artist poses as a pilot, a doctor and a lawyer while an FBI agent closes in.',
+      'Steven Spielberg', 2002, 141, 3, '/images/covers/11.jpg', 5.00),
+ (12, 'The Ring',
+      'A journalist investigates a cursed videotape that kills whoever watches it a week later.',
+      'Gore Verbinski', 2002, 115, 6, '/images/covers/12.jpg', 5.50),
+ (13, 'The Shawshank Redemption',
+      'A banker convicted of a murder he did not commit spends years quietly building his way to freedom.',
+      'Frank Darabont', 1994, 142, 3, '/images/covers/13.jpg', 6.00),
+ (14, 'Dawn of the Planet of the Apes',
+      'Intelligent apes confront the remnants of humanity over control of the Earth.',
+      'Matt Reeves', 2014, 130, 4, '/images/covers/14.jpg', 5.50),
+ (15, 'Man on Wire',
+      'The story of a high-wire artist on his way to walking between the Twin Towers.',
+      'James Marsh', 2008, 94, 7, '/images/covers/15.jpg', 4.50);
 
 
 -- ---------------------------------------------------------------------
@@ -165,6 +170,6 @@ UPDATE copies SET status = 'RENTED' WHERE barcode = 'SRT-13-001';
 -- rule ReviewService enforces.
 -- ---------------------------------------------------------------------
 INSERT INTO reviews (movie_id, user_id, rating, comment) VALUES
- (1, 2, 5, 'קלאסיקה. עדיין מחזיק מעמד אחרי כל השנים.'),
- (6, 2, 4, 'סרט מרגש, קצת ארוך אבל שווה.'),
- (9, 3, 5, 'אנימציה מדהימה, מתאים גם למבוגרים.');
+ (1, 2, 5, 'A classic. It still holds up after all these years.'),
+ (6, 2, 4, 'A moving film. A little long, but worth it.'),
+ (9, 3, 5, 'Stunning animation, and it works just as well for adults.');

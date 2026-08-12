@@ -25,8 +25,8 @@
 
         <ui:fragment rendered="#{empty movieBean.movie}">
             <div class="panel empty-state">
-                <div class="big">הסרט לא נמצא</div>
-                <h:link outcome="/catalog.xhtml" value="חזרה לקטלוג" styleClass="btn"/>
+                <div class="big">Film not found</div>
+                <h:link outcome="/catalog.xhtml" value="Back to the catalogue" styleClass="btn"/>
             </div>
         </ui:fragment>
 
@@ -44,43 +44,44 @@
                 <!-- details -->
                 <section>
                     <div class="panel">
-                        <h2>אודות הסרט</h2>
+                        <h2>About the film</h2>
                         <p style="margin-top:0;">#{movieBean.movie.description}</p>
 
                         <dl class="detail-grid">
-                            <dt>במאי</dt>
+                            <dt>Director</dt>
                             <dd><h:outputText value="#{movieBean.movie.director}"/>
                                 <h:outputText value="—" rendered="#{empty movieBean.movie.director}"/></dd>
 
-                            <dt>שנת הוצאה</dt>
+                            <dt>Release year</dt>
                             <dd><h:outputText value="#{movieBean.movie.releaseYear}"/>
                                 <h:outputText value="—" rendered="#{empty movieBean.movie.releaseYear}"/></dd>
 
-                            <dt>אורך</dt>
-                            <dd><h:outputText value="#{movieBean.movie.durationMinutes} דקות"
+                            <dt>Running time</dt>
+                            <dd><h:outputText value="#{movieBean.movie.durationMinutes} minutes"
                                               rendered="#{not empty movieBean.movie.durationMinutes}"/>
                                 <h:outputText value="—" rendered="#{empty movieBean.movie.durationMinutes}"/></dd>
 
-                            <dt>קטגוריה</dt>
+                            <dt>Category</dt>
                             <dd>#{movieBean.movie.categoryName}</dd>
 
-                            <dt>מחיר יומי</dt>
+                            <dt>Daily price</dt>
                             <dd>
                                 <h:outputText value="#{movieBean.movie.dailyPrice}">
                                     <f:convertNumber pattern="#,##0.00"/>
-                                </h:outputText> ש"ח
+                                </h:outputText> &#8362;
                             </dd>
 
-                            <dt>דירוג</dt>
+                            <dt>Rating</dt>
                             <dd>
                                 <span class="rating">
-                                    <h:outputText value="★ #{movieBean.movie.formattedRating} מתוך 5"
+                                    <h:outputText value="★ #{movieBean.movie.formattedRating} out of 5"
                                                   rendered="#{not empty movieBean.movie.averageRating}"/>
                                 </span>
-                                <h:outputText value="(#{movieBean.movie.reviewCount} ביקורות)"
+                                <h:outputText value="(#{movieBean.movie.reviewCount}
+                                               #{movieBean.movie.reviewCount eq 1 ? 'review' : 'reviews'})"
                                               rendered="#{not empty movieBean.movie.averageRating}"
                                               style="color:#5b6472;font-size:.85rem;"/>
-                                <h:outputText value="טרם דורג"
+                                <h:outputText value="Not yet rated"
                                               rendered="#{empty movieBean.movie.averageRating}"/>
                             </dd>
                         </dl>
@@ -88,9 +89,9 @@
 
                     <!-- reviews -->
                     <div class="panel">
-                        <h2>ביקורות</h2>
+                        <h2>Reviews</h2>
 
-                        <h:outputText value="עדיין אין ביקורות על סרט זה."
+                        <h:outputText value="There are no reviews for this film yet."
                                       rendered="#{empty movieBean.reviews}"
                                       style="color:#5b6472;"/>
 
@@ -112,25 +113,25 @@
                         <!-- Only customers who rented the title may review it. -->
                         <ui:fragment rendered="#{movieBean.mayReview}">
                             <h:form styleClass="panel" style="margin-top:18px;box-shadow:none;background:#f5f7fa;">
-                                <h2 style="font-size:1rem;">הביקורת שלך</h2>
+                                <h2 style="font-size:1rem;">Your review</h2>
 
                                 <div class="field">
-                                    <label for="rating">דירוג</label>
+                                    <label for="rating">Rating</label>
                                     <h:selectOneMenu id="rating" value="#{movieBean.rating}" style="max-width:180px;">
-                                        <f:selectItem itemValue="5" itemLabel="5 - מצוין"/>
-                                        <f:selectItem itemValue="4" itemLabel="4 - טוב מאוד"/>
-                                        <f:selectItem itemValue="3" itemLabel="3 - סביר"/>
-                                        <f:selectItem itemValue="2" itemLabel="2 - חלש"/>
-                                        <f:selectItem itemValue="1" itemLabel="1 - גרוע"/>
+                                        <f:selectItem itemValue="5" itemLabel="5 - Excellent"/>
+                                        <f:selectItem itemValue="4" itemLabel="4 - Very good"/>
+                                        <f:selectItem itemValue="3" itemLabel="3 - Fair"/>
+                                        <f:selectItem itemValue="2" itemLabel="2 - Poor"/>
+                                        <f:selectItem itemValue="1" itemLabel="1 - Bad"/>
                                     </h:selectOneMenu>
                                 </div>
 
                                 <div class="field">
-                                    <label for="comment">מה חשבת על הסרט?</label>
+                                    <label for="comment">What did you think of the film?</label>
                                     <h:inputTextarea id="comment" value="#{movieBean.comment}"/>
                                 </div>
 
-                                <h:commandButton value="שמירת ביקורת" action="#{movieBean.submitReview}"
+                                <h:commandButton value="Save review" action="#{movieBean.submitReview}"
                                                  styleClass="btn"/>
                             </h:form>
                         </ui:fragment>
@@ -139,47 +140,52 @@
 
                 <!-- availability / rent -->
                 <aside class="panel">
-                    <h2>זמינות</h2>
+                    <ui:fragment rendered="#{not empty movieBean.movie.coverUrl}">
+                        <h:graphicImage value="#{movieBean.movie.coverUrl}" styleClass="detail-cover"
+                                        alt="#{movieBean.movie.title} poster"/>
+                    </ui:fragment>
+
+                    <h2>Availability</h2>
 
                     <p>
-                        <h:outputText value="זמין להשאלה" styleClass="badge badge-ok"
+                        <h:outputText value="Available to rent" styleClass="badge badge-ok"
                                       rendered="#{movieBean.movie.available}"/>
-                        <h:outputText value="כל העותקים מושאלים" styleClass="badge badge-out"
+                        <h:outputText value="All copies are out" styleClass="badge badge-out"
                                       rendered="#{not movieBean.movie.available}"/>
                     </p>
 
                     <dl class="detail-grid" style="grid-template-columns:1fr auto;">
-                        <dt>עותקים במלאי</dt>
+                        <dt>Copies in stock</dt>
                         <dd>#{movieBean.movie.totalCopies}</dd>
-                        <dt>זמינים כעת</dt>
+                        <dt>Available now</dt>
                         <dd>#{movieBean.movie.availableCopies}</dd>
                     </dl>
 
                     <h:form style="margin-top:16px;">
                         <ui:fragment rendered="#{userSession.loggedIn}">
-                            <h:commandButton value="השאלת הסרט" action="#{movieBean.rent}"
+                            <h:commandButton value="Rent this film" action="#{movieBean.rent}"
                                              styleClass="btn" style="width:100%;"
                                              disabled="#{not movieBean.canRent}"/>
 
                             <ui:fragment rendered="#{not movieBean.canRent}">
                                 <p style="color:#5b6472;font-size:.83rem;margin-bottom:0;">
-                                    לא ניתן להשאיל כעת - ייתכן שכל העותקים מושאלים,
-                                    שהסרט כבר מושאל לך, או שהגעת למכסת ההשאלות.
+                                    Not available to rent right now - either all copies are out,
+                                    you already have this film, or you have reached your rental limit.
                                 </p>
                             </ui:fragment>
                         </ui:fragment>
 
                         <ui:fragment rendered="#{not userSession.loggedIn}">
                             <p style="color:#5b6472;font-size:.88rem;">
-                                יש להתחבר כדי להשאיל סרטים.
+                                You need to sign in to rent films.
                             </p>
-                            <h:link outcome="/login.xhtml" value="כניסה למערכת"
+                            <h:link outcome="/login.xhtml" value="Sign in"
                                     styleClass="btn" style="width:100%;text-align:center;"/>
                         </ui:fragment>
                     </h:form>
 
                     <p style="margin-top:18px;margin-bottom:0;">
-                        <h:link outcome="/catalog.xhtml" value="← חזרה לקטלוג"/>
+                        <h:link outcome="/catalog.xhtml" value="← Back to the catalogue"/>
                     </p>
                 </aside>
 

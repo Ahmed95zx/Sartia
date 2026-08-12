@@ -49,7 +49,7 @@ public class AuthFilter implements Filter {
 
         boolean adminArea = !CUSTOMER_PAGES.contains(path);
         if (adminArea && !session.isAdmin()) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "אזור זה מיועד למנהלי המערכת בלבד");
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "This area is for administrators only");
             return;
         }
 

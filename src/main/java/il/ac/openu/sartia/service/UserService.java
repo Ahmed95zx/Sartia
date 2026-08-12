@@ -42,10 +42,10 @@ public class UserService {
 
         return Database.inTransaction(connection -> {
             if (userDao.usernameExists(connection, username)) {
-                throw new ConflictException("שם המשתמש \"" + username + "\" כבר תפוס");
+                throw new ConflictException("The username \"" + username + "\" is already taken");
             }
             if (userDao.emailExists(connection, email)) {
-                throw new ConflictException("כתובת הדוא\"ל כבר רשומה במערכת");
+                throw new ConflictException("That email address is already registered");
             }
 
             User user = new User(username, email, fullName);
@@ -56,7 +56,7 @@ public class UserService {
             try {
                 return userDao.insert(connection, user);
             } catch (SQLIntegrityConstraintViolationException duplicate) {
-                throw new ConflictException("שם המשתמש או הדוא\"ל כבר רשומים במערכת");
+                throw new ConflictException("That username or email address is already registered");
             }
         });
     }
@@ -89,7 +89,7 @@ public class UserService {
             throw AuthenticationException.badCredentials();
         }
         if (!user.isActive()) {
-            throw new AuthenticationException("החשבון מושבת. יש לפנות למנהל המערכת.");
+            throw new AuthenticationException("This account is disabled. Please contact an administrator.");
         }
 
         // The caller keeps this object in the HTTP session; the hash has no
@@ -101,16 +101,16 @@ public class UserService {
     private void validateRegistration(String username, String password, String email, String fullName) {
         if (username == null || !USERNAME.matcher(username).matches()) {
             throw new ValidationException(
-                    "שם המשתמש חייב להכיל 3-50 תווים באנגלית, ספרות, נקודה, מקף או קו תחתון");
+                    "The username must be 3-50 characters: letters, digits, dot, hyphen or underscore");
         }
         if (password == null || password.length() < MIN_PASSWORD_LENGTH) {
-            throw new ValidationException("הסיסמה חייבת להכיל לפחות " + MIN_PASSWORD_LENGTH + " תווים");
+            throw new ValidationException("The password must be at least " + MIN_PASSWORD_LENGTH + " characters long");
         }
         if (email == null || !EMAIL.matcher(email).matches()) {
-            throw new ValidationException("כתובת הדוא\"ל אינה תקינה");
+            throw new ValidationException("That email address is not valid");
         }
         if (fullName == null || fullName.isBlank()) {
-            throw new ValidationException("יש להזין שם מלא");
+            throw new ValidationException("A full name is required");
         }
     }
 

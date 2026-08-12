@@ -141,7 +141,7 @@ public class CatalogService {
     public Movie createMovie(Movie movie, int initialCopies) {
         validate(movie);
         if (initialCopies < 1) {
-            throw new ValidationException("יש להזין לפחות עותק אחד");
+            throw new ValidationException("At least one copy is required");
         }
 
         return Database.inTransaction(connection -> {
@@ -166,7 +166,7 @@ public class CatalogService {
      */
     public void addCopies(long movieId, int count) {
         if (count < 1) {
-            throw new ValidationException("יש להזין מספר עותקים חיובי");
+            throw new ValidationException("The number of copies must be positive");
         }
 
         Database.runInTransaction(connection -> {
@@ -204,13 +204,13 @@ public class CatalogService {
                     .anyMatch(copy -> copy.getStatus() == CopyStatus.RENTED);
             if (anyOut) {
                 throw new ConflictException(
-                        "לא ניתן למחוק את \"" + movie.getTitle() + "\" בזמן שעותקים ממנו מושאלים.");
+                        "\"" + movie.getTitle() + "\" cannot be deleted while copies of it are on loan.");
             }
 
             if (rentalDao.countAnyRentalsOfMovie(connection, movieId) > 0) {
                 throw new ConflictException(
-                        "לא ניתן למחוק את \"" + movie.getTitle() + "\" משום שקיימות עבורו רשומות השאלה. "
-                        + "היסטוריית ההשאלות נשמרת לצמיתות.");
+                        "\"" + movie.getTitle() + "\" cannot be deleted because rental records exist for it. "
+                        + "Rental history is kept permanently.");
             }
 
             movieDao.delete(connection, movieId);
@@ -224,26 +224,26 @@ public class CatalogService {
 
     private void validate(Movie movie) {
         if (movie.getTitle() == null || movie.getTitle().isBlank()) {
-            throw new ValidationException("יש להזין שם סרט");
+            throw new ValidationException("A film title is required");
         }
         if (movie.getCategoryId() <= 0) {
-            throw new ValidationException("יש לבחור קטגוריה");
+            throw new ValidationException("A category must be selected");
         }
 
         Integer year = movie.getReleaseYear();
         if (year != null && (year < EARLIEST_PLAUSIBLE_YEAR || year > Year.now().getValue() + 1)) {
             throw new ValidationException(
-                    "שנת הוצאה חייבת להיות בין " + EARLIEST_PLAUSIBLE_YEAR + " ל-" + (Year.now().getValue() + 1));
+                    "The release year must be between " + EARLIEST_PLAUSIBLE_YEAR + " and " + (Year.now().getValue() + 1));
         }
 
         Integer duration = movie.getDurationMinutes();
         if (duration != null && (duration <= 0 || duration > 600)) {
-            throw new ValidationException("אורך הסרט חייב להיות בין 1 ל-600 דקות");
+            throw new ValidationException("The running time must be between 1 and 600 minutes");
         }
 
         BigDecimal price = movie.getDailyPrice();
         if (price == null || price.signum() < 0) {
-            throw new ValidationException("מחיר יומי חייב להיות מספר אי-שלילי");
+            throw new ValidationException("The daily price must be a non-negative number");
         }
     }
 }

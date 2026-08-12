@@ -10,15 +10,15 @@
                 xmlns:a="jakarta.faces.passthrough"
                 template="/WEB-INF/templates/layout.xhtml">
 
-    <ui:define name="title">קטלוג הסרטים</ui:define>
+    <ui:define name="title">Film Catalogue</ui:define>
 
     <ui:define name="content">
 
-        <h1 class="page-title">קטלוג הסרטים</h1>
+        <h1 class="page-title">Film Catalogue</h1>
         <p class="page-subtitle">
-            <h:outputText value="קטגוריה: #{catalogBean.activeCategoryName}"
+            <h:outputText value="Category: #{catalogBean.activeCategoryName}"
                           rendered="#{not empty catalogBean.activeCategoryName}"/>
-            <h:outputText value="עיון וחיפוש במאגר הסרטים"
+            <h:outputText value="Browse and search the film library"
                           rendered="#{empty catalogBean.activeCategoryName}"/>
         </p>
 
@@ -26,13 +26,13 @@
 
             <!-- categories -->
             <aside class="panel">
-                <h2>קטגוריות</h2>
+                <h2>Categories</h2>
                 <h:form id="catForm">
                     <ul class="cat-list">
                         <li>
                             <h:commandLink styleClass="lnk #{empty catalogBean.criteria.categoryId ? 'active' : ''}"
                                            action="#{catalogBean.filterByCategory(null)}">
-                                <span>הכול</span>
+                                <span>All</span>
                             </h:commandLink>
                         </li>
                         <ui:repeat value="#{catalogBean.categories}" var="cat">
@@ -55,18 +55,18 @@
                     <h:form id="searchForm">
                         <div class="toolbar">
                             <div class="grow">
-                                <label for="searchForm:q">חיפוש חופשי</label>
+                                <label for="searchForm:q">Search</label>
                                 <h:inputText id="q" value="#{catalogBean.criteria.keyword}"
-                                             a:placeholder="שם סרט, במאי או מילה מהתקציר"/>
+                                             a:placeholder="Title, director or a word from the synopsis"/>
                             </div>
 
                             <div>
-                                <label for="searchForm:sort">מיון</label>
+                                <label for="searchForm:sort">Sort by</label>
                                 <h:selectOneMenu id="sort" value="#{catalogBean.criteria.sortBy}">
-                                    <f:selectItem itemValue="TITLE"  itemLabel="שם"/>
-                                    <f:selectItem itemValue="YEAR"   itemLabel="שנה"/>
-                                    <f:selectItem itemValue="RATING" itemLabel="דירוג"/>
-                                    <f:selectItem itemValue="NEWEST" itemLabel="נוסף לאחרונה"/>
+                                    <f:selectItem itemValue="TITLE"  itemLabel="Title"/>
+                                    <f:selectItem itemValue="YEAR"   itemLabel="Year"/>
+                                    <f:selectItem itemValue="RATING" itemLabel="Rating"/>
+                                    <f:selectItem itemValue="NEWEST" itemLabel="Recently added"/>
                                 </h:selectOneMenu>
                             </div>
 
@@ -75,15 +75,15 @@
                                 <label style="font-weight:400;font-size:.88rem;white-space:nowrap;">
                                     <h:selectBooleanCheckbox value="#{catalogBean.criteria.onlyAvailable}"
                                                              style="width:auto;margin-inline-end:6px;"/>
-                                    רק זמינים
+                                    Available only
                                 </label>
                             </div>
 
                             <div style="flex:0 0 auto;">
-                                <h:commandButton value="חפש" action="#{catalogBean.search}" styleClass="btn"/>
+                                <h:commandButton value="Search" action="#{catalogBean.search}" styleClass="btn"/>
                             </div>
                             <div style="flex:0 0 auto;">
-                                <h:commandButton value="נקה" action="#{catalogBean.clearFilters}"
+                                <h:commandButton value="Clear" action="#{catalogBean.clearFilters}"
                                                  styleClass="btn btn-secondary" immediate="true"/>
                             </div>
                         </div>
@@ -93,8 +93,8 @@
                 <!-- no results -->
                 <ui:fragment rendered="#{empty catalogBean.result.movies}">
                     <div class="panel empty-state">
-                        <div class="big">לא נמצאו סרטים</div>
-                        <div>כדאי לנסות מונח חיפוש אחר או לנקות את הסינון.</div>
+                        <div class="big">No films found</div>
+                        <div>Try a different search term or clear the filters.</div>
                     </div>
                 </ui:fragment>
 
@@ -103,44 +103,58 @@
                     <div class="movie-grid">
                         <ui:repeat value="#{catalogBean.result.movies}" var="movie">
                             <article class="movie-card">
-                                <div class="title">
-                                    <h:link outcome="/movie.xhtml" value="#{movie.title}">
-                                        <f:param name="id" value="#{movie.id}"/>
-                                    </h:link>
-                                </div>
+                                <!-- A context-relative value (leading slash) lets
+                                     h:graphicImage prepend the context root, while
+                                     an absolute http(s) URL is passed through. -->
+                                <h:link outcome="/movie.xhtml" styleClass="cover">
+                                    <f:param name="id" value="#{movie.id}"/>
+                                    <h:graphicImage value="#{movie.coverUrl}" alt="#{movie.title} poster"
+                                                    rendered="#{not empty movie.coverUrl}"/>
+                                    <ui:fragment rendered="#{empty movie.coverUrl}">
+                                        <span class="cover-none">#{movie.title}</span>
+                                    </ui:fragment>
+                                </h:link>
 
-                                <div class="meta">
-                                    <h:outputText value="#{movie.releaseYear}"
-                                                  rendered="#{not empty movie.releaseYear}"/>
-                                    <h:outputText value=" · " rendered="#{not empty movie.releaseYear}"/>
-                                    #{movie.categoryName}
-                                </div>
+                                <div class="card-body">
+                                    <div class="title">
+                                        <h:link outcome="/movie.xhtml" value="#{movie.title}">
+                                            <f:param name="id" value="#{movie.id}"/>
+                                        </h:link>
+                                    </div>
 
-                                <div class="meta" style="font-size:.8rem;">
-                                    <h:outputText value="בימוי: #{movie.director}"
-                                                  rendered="#{not empty movie.director}"/>
-                                </div>
+                                    <div class="meta">
+                                        <h:outputText value="#{movie.releaseYear}"
+                                                      rendered="#{not empty movie.releaseYear}"/>
+                                        <h:outputText value=" · " rendered="#{not empty movie.releaseYear}"/>
+                                        #{movie.categoryName}
+                                    </div>
 
-                                <div class="synopsis">#{movie.description}</div>
+                                    <div class="meta" style="font-size:.8rem;">
+                                        <h:outputText value="Directed by #{movie.director}"
+                                                      rendered="#{not empty movie.director}"/>
+                                    </div>
 
-                                <div class="meta">
-                                    <span class="rating" title="דירוג ממוצע">
-                                        <h:outputText value="★ #{movie.formattedRating} (#{movie.reviewCount})"
-                                                      rendered="#{not empty movie.averageRating}"/>
-                                    </span>
-                                    <h:outputText value="טרם דורג" rendered="#{empty movie.averageRating}"
-                                                  style="font-size:.8rem;"/>
+                                    <div class="synopsis">#{movie.description}</div>
+
+                                    <div class="meta">
+                                        <span class="rating" title="Average rating">
+                                            <h:outputText value="★ #{movie.formattedRating} (#{movie.reviewCount})"
+                                                          rendered="#{not empty movie.averageRating}"/>
+                                        </span>
+                                        <h:outputText value="Not yet rated" rendered="#{empty movie.averageRating}"
+                                                      style="font-size:.8rem;"/>
+                                    </div>
                                 </div>
 
                                 <div class="card-foot">
-                                    <h:outputText value="זמין (#{movie.availableCopies})"
+                                    <h:outputText value="Available (#{movie.availableCopies})"
                                                   styleClass="badge badge-ok"
                                                   rendered="#{movie.available}"/>
-                                    <h:outputText value="הכול מושאל"
+                                    <h:outputText value="All copies out"
                                                   styleClass="badge badge-out"
                                                   rendered="#{not movie.available}"/>
 
-                                    <h:link outcome="/movie.xhtml" value="פרטים" styleClass="btn btn-secondary btn-sm">
+                                    <h:link outcome="/movie.xhtml" value="Details" styleClass="btn btn-secondary btn-sm">
                                         <f:param name="id" value="#{movie.id}"/>
                                     </h:link>
                                 </div>
@@ -151,16 +165,16 @@
                     <!-- paging -->
                     <h:form>
                         <div class="pager">
-                            <h:commandButton value="הקודם" action="#{catalogBean.previousPage}"
+                            <h:commandButton value="Previous" action="#{catalogBean.previousPage}"
                                              styleClass="btn btn-secondary btn-sm"
                                              disabled="#{not catalogBean.result.hasPrevious}"/>
 
                             <span class="info">
-                                עמוד #{catalogBean.result.page} מתוך #{catalogBean.result.totalPages}
-                                · #{catalogBean.result.totalCount} סרטים
+                                Page #{catalogBean.result.page} of #{catalogBean.result.totalPages}
+                                · #{catalogBean.result.totalCount} films
                             </span>
 
-                            <h:commandButton value="הבא" action="#{catalogBean.nextPage}"
+                            <h:commandButton value="Next" action="#{catalogBean.nextPage}"
                                              styleClass="btn btn-secondary btn-sm"
                                              disabled="#{not catalogBean.result.hasNext}"/>
                         </div>

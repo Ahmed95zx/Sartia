@@ -10,31 +10,31 @@
                 xmlns:ui="jakarta.faces.facelets"
                 template="/WEB-INF/templates/layout.xhtml">
 
-    <ui:define name="title">השאלות פתוחות</ui:define>
+    <ui:define name="title">Open Rentals</ui:define>
 
     <ui:define name="content">
 
-        <h1 class="page-title">השאלות פתוחות</h1>
-        <p class="page-subtitle">מעקב אחר סרטים שהושאלו וטיפול בהחזרות</p>
+        <h1 class="page-title">Open Rentals</h1>
+        <p class="page-subtitle">Track films that are out and process returns</p>
 
         <div class="stat-row">
             <div class="stat">
                 <div class="n">#{returnsBean.openRentals.size()}</div>
-                <div class="l">השאלות פתוחות</div>
+                <div class="l">Open rentals</div>
             </div>
             <div class="stat #{returnsBean.overdueCount gt 0 ? 'alert' : ''}">
                 <div class="n">#{returnsBean.overdueCount}</div>
-                <div class="l">באיחור</div>
+                <div class="l">Overdue</div>
             </div>
         </div>
 
         <div class="panel">
-            <h2>כל ההשאלות הפתוחות</h2>
+            <h2>All open rentals</h2>
 
             <ui:fragment rendered="#{empty returnsBean.openRentals}">
                 <div class="empty-state">
-                    <div class="big">אין השאלות פתוחות</div>
-                    <div>כל העותקים נמצאים במלאי.</div>
+                    <div class="big">There are no open rentals</div>
+                    <div>Every copy is on the shelf.</div>
                 </div>
             </ui:fragment>
 
@@ -43,14 +43,14 @@
                     <table class="data">
                         <thead>
                             <tr>
-                                <th>סרט</th>
-                                <th>ברקוד</th>
-                                <th>לקוח</th>
-                                <th>תאריך השאלה</th>
-                                <th>להחזרה עד</th>
-                                <th>סטטוס</th>
-                                <th>קנס</th>
-                                <th>פעולות</th>
+                                <th>Film</th>
+                                <th>Barcode</th>
+                                <th>Customer</th>
+                                <th>Rented on</th>
+                                <th>Due back</th>
+                                <th>Status</th>
+                                <th>Fee</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -77,26 +77,27 @@
                                         </h:outputText>
                                     </td>
                                     <td>
-                                        <h:outputText value="באיחור #{rental.daysOverdue} ימים"
+                                        <h:outputText value="#{rental.daysOverdue}
+                                                       #{rental.daysOverdue eq 1 ? 'day' : 'days'} overdue"
                                                       styleClass="badge badge-out"
                                                       rendered="#{rental.overdue}"/>
-                                        <h:outputText value="בתוקף" styleClass="badge badge-ok"
+                                        <h:outputText value="On time" styleClass="badge badge-ok"
                                                       rendered="#{not rental.overdue}"/>
                                     </td>
                                     <td>
-                                        <h:outputText value="#{rental.projectedLateFee} ש&quot;ח"
+                                        <h:outputText value="#{rental.projectedLateFee} &#8362;"
                                                       rendered="#{rental.overdue}"
                                                       style="color:#b3261e;font-weight:600;"/>
                                         <h:outputText value="—" rendered="#{not rental.overdue}"/>
                                     </td>
                                     <td style="white-space:nowrap;">
-                                        <h:commandButton value="החזרה"
+                                        <h:commandButton value="Return"
                                                          action="#{returnsBean.processReturn(rental)}"
                                                          styleClass="btn btn-sm"/>
-                                        <h:commandButton value="סימון כאבוד"
+                                        <h:commandButton value="Mark as lost"
                                                          action="#{returnsBean.markLost(rental)}"
                                                          styleClass="btn btn-danger btn-sm"
-                                                         onclick="return confirm('לסמן את העותק כאבוד?');"/>
+                                                         onclick="return confirm('Mark this copy as lost?');"/>
                                     </td>
                                 </tr>
                             </ui:repeat>

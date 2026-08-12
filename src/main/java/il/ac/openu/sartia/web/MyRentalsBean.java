@@ -42,9 +42,9 @@ public class MyRentalsBean implements Serializable {
         try {
             BigDecimal lateFee = rentalService.returnRental(rentalId, session.getUserId(), false);
             if (lateFee.signum() > 0) {
-                Messages.info("הסרט הוחזר. נגבה קנס איחור בסך " + lateFee + " ש\"ח.");
+                Messages.info("Film returned. A late fee of " + lateFee + " ₪ was charged.");
             } else {
-                Messages.info("הסרט הוחזר בהצלחה. תודה!");
+                Messages.info("Film returned successfully. Thank you!");
             }
         } catch (BusinessException failure) {
             Messages.error(failure.getMessage());

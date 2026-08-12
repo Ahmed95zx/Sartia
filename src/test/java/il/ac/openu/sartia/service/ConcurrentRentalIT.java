@@ -73,7 +73,7 @@ class ConcurrentRentalIT {
         int copies = 3;
         int customers = 20;
 
-        seedMovie("מבחן עומס", copies);
+        seedMovie("load test", copies);
         seedUsers(customers);
 
         RaceOutcome outcome = raceToRent(customers);
@@ -95,7 +95,7 @@ class ConcurrentRentalIT {
     @Test
     @DisplayName("15 customers racing for the last copy produce exactly 1 rental")
     void lastCopyGoesToExactlyOneCustomer() throws Exception {
-        seedMovie("העותק האחרון", 1);
+        seedMovie("last copy", 1);
         seedUsers(15);
 
         RaceOutcome outcome = raceToRent(15);
@@ -114,7 +114,7 @@ class ConcurrentRentalIT {
     @DisplayName("with a copy for everyone, every customer succeeds")
     void everyoneSucceedsWhenStockIsSufficient() throws Exception {
         int customers = 10;
-        seedMovie("מלאי מספיק", customers);
+        seedMovie("enough stock", customers);
         seedUsers(customers);
 
         RaceOutcome outcome = raceToRent(customers);
@@ -128,7 +128,7 @@ class ConcurrentRentalIT {
     @Test
     @DisplayName("one customer submitting twice at once gets a single rental")
     void doubleSubmitByOneCustomerRentsOnce() throws Exception {
-        seedMovie("לחיצה כפולה", 5);
+        seedMovie("double click", 5);
         long userId = seedUser("dbl");
 
         int attempts = 8;
@@ -172,7 +172,7 @@ class ConcurrentRentalIT {
         // stops them - the limit itself has to.
         List<Long> movieIds = new ArrayList<>();
         for (int i = 0; i < attempts; i++) {
-            seedMovie("מכסה " + i, 1);
+            seedMovie("quota " + i, 1);
             movieIds.add(movieId);
         }
 
@@ -317,7 +317,7 @@ class ConcurrentRentalIT {
                     Statement.RETURN_GENERATED_KEYS)) {
                 statement.setString(1, unique);
                 statement.setString(2, unique + "@test.local");
-                statement.setString(3, "בדיקה " + unique);
+                statement.setString(3, "test " + unique);
                 statement.executeUpdate();
                 try (var keys = statement.getGeneratedKeys()) {
                     keys.next();

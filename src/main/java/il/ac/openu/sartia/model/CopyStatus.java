@@ -10,21 +10,22 @@ package il.ac.openu.sartia.model;
 public enum CopyStatus {
 
     /** On the shelf, may be rented. */
-    AVAILABLE("זמין"),
+    AVAILABLE("Available"),
 
     /** Currently checked out to a customer. */
-    RENTED("מושאל"),
+    RENTED("Rented"),
 
     /** Written off - damaged or never returned. Never rentable again. */
-    LOST("אבוד");
+    LOST("Lost");
 
-    private final String hebrewLabel;
+    private final String label;
 
-    CopyStatus(String hebrewLabel) {
-        this.hebrewLabel = hebrewLabel;
+    CopyStatus(String label) {
+        this.label = label;
     }
 
-    public String getHebrewLabel() {
-        return hebrewLabel;
+    /** Display text for the status, used by the inventory screen. */
+    public String getLabel() {
+        return label;
     }
 }

@@ -7,34 +7,35 @@
                 xmlns:h="jakarta.faces.html"
                 xmlns:f="jakarta.faces.core"
                 xmlns:ui="jakarta.faces.facelets"
+                xmlns:a="jakarta.faces.passthrough"
                 template="/WEB-INF/templates/layout.xhtml">
 
-    <ui:define name="title">ניהול קטלוג</ui:define>
+    <ui:define name="title">Manage Catalogue</ui:define>
 
     <ui:define name="content">
 
-        <h1 class="page-title">ניהול קטלוג</h1>
-        <p class="page-subtitle">הוספה, עריכה ומחיקה של סרטים וניהול מלאי העותקים</p>
+        <h1 class="page-title">Manage Catalogue</h1>
+        <p class="page-subtitle">Add, edit and remove films, and manage copy inventory</p>
 
         <!-- editor -->
         <ui:fragment rendered="#{movieAdminBean.editorOpen}">
             <div class="panel">
                 <h2>
-                    <h:outputText value="הוספת סרט חדש" rendered="#{movieAdminBean.editing.id eq 0}"/>
-                    <h:outputText value="עריכת סרט" rendered="#{movieAdminBean.editing.id ne 0}"/>
+                    <h:outputText value="Add a new film" rendered="#{movieAdminBean.editing.id eq 0}"/>
+                    <h:outputText value="Edit film" rendered="#{movieAdminBean.editing.id ne 0}"/>
                 </h2>
 
                 <h:form id="editForm">
                     <div class="form-row">
                         <div class="field">
-                            <label for="editForm:title">שם הסרט</label>
+                            <label for="editForm:title">Title</label>
                             <h:inputText id="title" value="#{movieAdminBean.editing.title}" required="true"
-                                         requiredMessage="יש להזין שם סרט"/>
+                                         requiredMessage="Please enter a title"/>
                             <h:message for="title" styleClass="field-error"/>
                         </div>
 
                         <div class="field">
-                            <label for="editForm:category">קטגוריה</label>
+                            <label for="editForm:category">Category</label>
                             <h:selectOneMenu id="category" value="#{movieAdminBean.editing.categoryId}">
                                 <f:selectItems value="#{movieAdminBean.categories}" var="cat"
                                                itemValue="#{cat.id}" itemLabel="#{cat.name}"/>
@@ -43,50 +44,58 @@
                     </div>
 
                     <div class="field">
-                        <label for="editForm:description">תקציר</label>
+                        <label for="editForm:description">Synopsis</label>
                         <h:inputTextarea id="description" value="#{movieAdminBean.editing.description}"/>
                     </div>
 
                     <div class="form-row">
                         <div class="field">
-                            <label for="editForm:director">במאי</label>
+                            <label for="editForm:director">Director</label>
                             <h:inputText id="director" value="#{movieAdminBean.editing.director}"/>
                         </div>
 
                         <div class="field">
-                            <label for="editForm:year">שנת הוצאה</label>
+                            <label for="editForm:year">Release year</label>
                             <h:inputText id="year" value="#{movieAdminBean.editing.releaseYear}"
-                                         converterMessage="שנה חייבת להיות מספר"/>
+                                         converterMessage="The year must be a number"/>
                             <h:message for="year" styleClass="field-error"/>
                         </div>
 
                         <div class="field">
-                            <label for="editForm:duration">אורך (דקות)</label>
+                            <label for="editForm:duration">Running time (minutes)</label>
                             <h:inputText id="duration" value="#{movieAdminBean.editing.durationMinutes}"
-                                         converterMessage="אורך חייב להיות מספר"/>
+                                         converterMessage="The running time must be a number"/>
                             <h:message for="duration" styleClass="field-error"/>
                         </div>
 
                         <div class="field">
-                            <label for="editForm:price">מחיר יומי</label>
+                            <label for="editForm:price">Daily price</label>
                             <h:inputText id="price" value="#{movieAdminBean.editing.dailyPrice}"
-                                         converterMessage="מחיר חייב להיות מספר"/>
+                                         converterMessage="The price must be a number"/>
                             <h:message for="price" styleClass="field-error"/>
                         </div>
+                    </div>
+
+                    <!-- Accepts either a path under the application (leading
+                         slash) or a full external URL; the view renders both. -->
+                    <div class="field">
+                        <label for="editForm:cover">Cover image URL</label>
+                        <h:inputText id="cover" value="#{movieAdminBean.editing.coverUrl}"
+                                     a:placeholder="/images/covers/1.jpg or https://..."/>
                     </div>
 
                     <!-- Only meaningful when creating: an existing title's copies
                          are managed from the inventory panel instead. -->
                     <ui:fragment rendered="#{movieAdminBean.editing.id eq 0}">
                         <div class="field" style="max-width:220px;">
-                            <label for="editForm:copies">מספר עותקים ראשוני</label>
+                            <label for="editForm:copies">Initial number of copies</label>
                             <h:inputText id="copies" value="#{movieAdminBean.initialCopies}"/>
                         </div>
                     </ui:fragment>
 
                     <div class="form-actions">
-                        <h:commandButton value="שמירה" action="#{movieAdminBean.save}" styleClass="btn"/>
-                        <h:commandButton value="ביטול" action="#{movieAdminBean.cancelEdit}"
+                        <h:commandButton value="Save" action="#{movieAdminBean.save}" styleClass="btn"/>
+                        <h:commandButton value="Cancel" action="#{movieAdminBean.cancelEdit}"
                                          styleClass="btn btn-secondary" immediate="true"/>
                     </div>
                 </h:form>
@@ -96,14 +105,14 @@
         <!-- inventory panel -->
         <ui:fragment rendered="#{movieAdminBean.inventoryMovieId ne 0}">
             <div class="panel">
-                <h2>מלאי עותקים</h2>
+                <h2>Copy inventory</h2>
 
                 <table class="data" style="margin-bottom:16px;">
                     <thead>
                         <tr>
-                            <th>ברקוד</th>
-                            <th>סטטוס</th>
-                            <th>נוסף בתאריך</th>
+                            <th>Barcode</th>
+                            <th>Status</th>
+                            <th>Added on</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -111,7 +120,7 @@
                             <tr>
                                 <td>#{copy.barcode}</td>
                                 <td>
-                                    <h:outputText value="#{copy.status.hebrewLabel}"
+                                    <h:outputText value="#{copy.status.label}"
                                                   styleClass="badge #{copy.status eq 'AVAILABLE' ? 'badge-ok'
                                                                      : (copy.status eq 'RENTED' ? 'badge-warn' : 'badge-out')}"/>
                                 </td>
@@ -128,16 +137,16 @@
                 <h:form>
                     <div class="toolbar">
                         <div style="flex:0 0 auto;">
-                            <label for="addCopies">עותקים להוספה</label>
+                            <label for="addCopies">Copies to add</label>
                             <h:inputText id="addCopies" value="#{movieAdminBean.copiesToAdd}"
                                          style="width:90px;"/>
                         </div>
                         <div style="flex:0 0 auto;">
-                            <h:commandButton value="הוספת עותקים" action="#{movieAdminBean.addCopies}"
+                            <h:commandButton value="Add copies" action="#{movieAdminBean.addCopies}"
                                              styleClass="btn"/>
                         </div>
                         <div style="flex:0 0 auto;">
-                            <h:commandButton value="סגירה" action="#{movieAdminBean.closeInventory}"
+                            <h:commandButton value="Close" action="#{movieAdminBean.closeInventory}"
                                              styleClass="btn btn-secondary"/>
                         </div>
                     </div>
@@ -148,9 +157,9 @@
         <!-- catalogue table -->
         <div class="panel">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-                <h2 style="margin:0;">סרטים בקטלוג (#{movieAdminBean.movies.size()})</h2>
+                <h2 style="margin:0;">Films in the catalogue (#{movieAdminBean.movies.size()})</h2>
                 <h:form>
-                    <h:commandButton value="הוספת סרט חדש" action="#{movieAdminBean.newMovie}" styleClass="btn"/>
+                    <h:commandButton value="Add a new film" action="#{movieAdminBean.newMovie}" styleClass="btn"/>
                 </h:form>
             </div>
 
@@ -158,13 +167,13 @@
                 <table class="data">
                     <thead>
                         <tr>
-                            <th>שם</th>
-                            <th>קטגוריה</th>
-                            <th>שנה</th>
-                            <th>עותקים</th>
-                            <th>זמינים</th>
-                            <th>דירוג</th>
-                            <th>פעולות</th>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>Year</th>
+                            <th>Copies</th>
+                            <th>Available</th>
+                            <th>Rating</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -189,13 +198,13 @@
                                     <h:outputText value="—" rendered="#{empty movie.averageRating}"/>
                                 </td>
                                 <td style="white-space:nowrap;">
-                                    <h:commandButton value="עריכה" action="#{movieAdminBean.edit(movie)}"
+                                    <h:commandButton value="Edit" action="#{movieAdminBean.edit(movie)}"
                                                      styleClass="btn btn-secondary btn-sm"/>
-                                    <h:commandButton value="מלאי" action="#{movieAdminBean.showInventory(movie)}"
+                                    <h:commandButton value="Inventory" action="#{movieAdminBean.showInventory(movie)}"
                                                      styleClass="btn btn-secondary btn-sm"/>
-                                    <h:commandButton value="מחיקה" action="#{movieAdminBean.delete(movie)}"
+                                    <h:commandButton value="Delete" action="#{movieAdminBean.delete(movie)}"
                                                      styleClass="btn btn-danger btn-sm"
-                                                     onclick="return confirm('למחוק את הסרט לצמיתות?');"/>
+                                                     onclick="return confirm('Permanently delete this film?');"/>
                                 </td>
                             </tr>
                         </ui:repeat>

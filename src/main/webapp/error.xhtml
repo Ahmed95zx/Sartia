@@ -11,24 +11,24 @@
                 xmlns:ui="jakarta.faces.facelets"
                 template="/WEB-INF/templates/layout.xhtml">
 
-    <ui:define name="title">שגיאה</ui:define>
+    <ui:define name="title">Error</ui:define>
 
     <ui:define name="content">
 
         <div class="panel empty-state">
-            <div class="big">אירעה שגיאה</div>
+            <div class="big">Something went wrong</div>
 
             <p>
-                <h:outputText value="הדף המבוקש לא נמצא."
+                <h:outputText value="The page you asked for could not be found."
                               rendered="#{requestScope['jakarta.servlet.error.status_code'] eq 404}"/>
-                <h:outputText value="אין לך הרשאה לצפות בדף זה."
+                <h:outputText value="You do not have permission to view this page."
                               rendered="#{requestScope['jakarta.servlet.error.status_code'] eq 403}"/>
-                <h:outputText value="אירעה תקלה בעת הטיפול בבקשה. אפשר לנסות שוב."
+                <h:outputText value="An error occurred while handling the request. Please try again."
                               rendered="#{requestScope['jakarta.servlet.error.status_code'] ne 404
                                           and requestScope['jakarta.servlet.error.status_code'] ne 403}"/>
             </p>
 
-            <h:link outcome="/catalog.xhtml" value="חזרה לקטלוג" styleClass="btn"/>
+            <h:link outcome="/catalog.xhtml" value="Back to the catalogue" styleClass="btn"/>
         </div>
 
     </ui:define>

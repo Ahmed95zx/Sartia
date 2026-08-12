@@ -5,65 +5,65 @@
                 xmlns:ui="jakarta.faces.facelets"
                 template="/WEB-INF/templates/layout.xhtml">
 
-    <ui:define name="title">הרשמה</ui:define>
+    <ui:define name="title">Register</ui:define>
 
     <ui:define name="content">
 
         <div class="narrow">
             <div class="panel">
-                <h1 class="page-title" style="font-size:1.35rem;">הרשמה למערכת</h1>
-                <p class="page-subtitle">ההרשמה נדרשת כדי להשאיל סרטים ולכתוב ביקורות</p>
+                <h1 class="page-title" style="font-size:1.35rem;">Create an account</h1>
+                <p class="page-subtitle">An account is required to rent films and write reviews</p>
 
                 <h:form id="regForm">
                     <div class="field">
-                        <label for="regForm:username">שם משתמש</label>
+                        <label for="regForm:username">Username</label>
                         <h:inputText id="username" value="#{registerBean.username}" required="true"
-                                     requiredMessage="יש להזין שם משתמש"/>
+                                     requiredMessage="Please enter a username"/>
                         <h:message for="username" styleClass="field-error"/>
                     </div>
 
                     <div class="field">
-                        <label for="regForm:fullName">שם מלא</label>
+                        <label for="regForm:fullName">Full name</label>
                         <h:inputText id="fullName" value="#{registerBean.fullName}" required="true"
-                                     requiredMessage="יש להזין שם מלא"/>
+                                     requiredMessage="Please enter your full name"/>
                         <h:message for="fullName" styleClass="field-error"/>
                     </div>
 
                     <div class="field">
-                        <label for="regForm:email">דואר אלקטרוני</label>
+                        <label for="regForm:email">Email address</label>
                         <h:inputText id="email" value="#{registerBean.email}" required="true"
-                                     requiredMessage="יש להזין כתובת דוא&quot;ל"/>
+                                     requiredMessage="Please enter an email address"/>
                         <h:message for="email" styleClass="field-error"/>
                     </div>
 
                     <div class="field">
-                        <label for="regForm:phone">טלפון (רשות)</label>
+                        <label for="regForm:phone">Phone (optional)</label>
                         <h:inputText id="phone" value="#{registerBean.phone}"/>
                     </div>
 
                     <div class="form-row">
                         <div class="field">
-                            <label for="regForm:password">סיסמה</label>
+                            <label for="regForm:password">Password</label>
                             <h:inputSecret id="password" value="#{registerBean.password}" required="true"
-                                           requiredMessage="יש להזין סיסמה"/>
+                                           requiredMessage="Please enter a password"/>
                             <h:message for="password" styleClass="field-error"/>
                         </div>
 
                         <div class="field">
-                            <label for="regForm:passwordConfirm">אישור סיסמה</label>
+                            <label for="regForm:passwordConfirm">Confirm password</label>
                             <h:inputSecret id="passwordConfirm" value="#{registerBean.passwordConfirm}"
-                                           required="true" requiredMessage="יש לאשר את הסיסמה"/>
+                                           required="true" requiredMessage="Please confirm the password"/>
                             <h:message for="passwordConfirm" styleClass="field-error"/>
                         </div>
                     </div>
 
                     <p style="font-size:.82rem;color:#5b6472;margin:0;">
-                        הסיסמה חייבת להכיל לפחות 8 תווים.
+                        The password must be at least 8 characters long.
                     </p>
 
                     <div class="form-actions">
-                        <h:commandButton value="הרשמה" action="#{registerBean.register}" styleClass="btn"/>
-                        <h:link outcome="/login.xhtml" value="כבר רשום? כניסה" styleClass="btn btn-secondary"/>
+                        <h:commandButton value="Register" action="#{registerBean.register}" styleClass="btn"/>
+                        <h:link outcome="/login.xhtml" value="Already registered? Sign in" styleClass="btn btn-secondary"/>
                     </div>
                 </h:form>
             </div>

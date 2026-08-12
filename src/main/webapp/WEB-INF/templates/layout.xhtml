@@ -11,12 +11,12 @@
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core"
       xmlns:ui="jakarta.faces.facelets"
-      lang="he" dir="rtl">
+      lang="en" dir="ltr">
 
 <h:head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title><ui:insert name="title">סרטייה</ui:insert> · סרטייה</title>
+    <title><ui:insert name="title">Sartia</ui:insert> · Sartia</title>
     <h:outputStylesheet library="css" name="sartia.css"/>
 </h:head>
 
@@ -25,34 +25,34 @@
     <header class="site-header">
         <div class="header-inner">
             <h:link outcome="/catalog.xhtml" styleClass="brand">
-                סרטייה<span>השאלת סרטים</span>
+                Sartia<span>Movie Rentals</span>
             </h:link>
 
             <nav class="main-nav">
-                <h:link outcome="/catalog.xhtml" value="קטלוג"/>
+                <h:link outcome="/catalog.xhtml" value="Catalogue"/>
 
-                <h:link outcome="/my-rentals.xhtml" value="ההשאלות שלי"
+                <h:link outcome="/my-rentals.xhtml" value="My Rentals"
                         rendered="#{userSession.loggedIn}"/>
 
-                <h:link outcome="/admin/movies.xhtml" value="ניהול קטלוג"
+                <h:link outcome="/admin/movies.xhtml" value="Manage Catalogue"
                         rendered="#{userSession.admin}"/>
 
-                <h:link outcome="/admin/returns.xhtml" value="השאלות פתוחות"
+                <h:link outcome="/admin/returns.xhtml" value="Open Rentals"
                         rendered="#{userSession.admin}"/>
             </nav>
 
             <div class="user-area">
                 <ui:fragment rendered="#{userSession.loggedIn}">
-                    <span class="who">שלום, #{userSession.displayName}</span>
+                    <span class="who">Hello, #{userSession.displayName}</span>
                     <h:form>
-                        <h:commandButton value="יציאה" action="#{userSession.logout}"
+                        <h:commandButton value="Sign out" action="#{userSession.logout}"
                                          styleClass="btn btn-secondary btn-sm"/>
                     </h:form>
                 </ui:fragment>
 
                 <ui:fragment rendered="#{not userSession.loggedIn}">
-                    <h:link outcome="/login.xhtml" value="כניסה" styleClass="btn btn-secondary btn-sm"/>
-                    <h:link outcome="/register.xhtml" value="הרשמה" styleClass="btn btn-sm"/>
+                    <h:link outcome="/login.xhtml" value="Sign in" styleClass="btn btn-secondary btn-sm"/>
+                    <h:link outcome="/register.xhtml" value="Register" styleClass="btn btn-sm"/>
                 </ui:fragment>
             </div>
         </div>
@@ -71,7 +71,7 @@
     </main>
 
     <footer class="site-footer">
-        סרטייה · פרויקט גמר · האוניברסיטה הפתוחה
+        Sartia · Final Project · The Open University
     </footer>
 
 </h:body>

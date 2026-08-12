@@ -88,11 +88,12 @@ CREATE TABLE movies (
   KEY idx_movies_title    (title)
 
   -- Deliberately no FULLTEXT index. MySQL's full-text matching works on whole
-  -- words or their prefixes, but Hebrew attaches the definite article and
-  -- several prepositions to the front of a word (המטריקס = ה + מטריקס), so a
-  -- prefix search for מטריקס would never match המטריקס - the very search a
-  -- customer performs. MovieDao uses substring matching instead; see the note
-  -- on that class.
+  -- words or their prefixes, so it cannot match a fragment from the middle of
+  -- a word: 'batman' would not find "The Dark Knight". MovieDao uses substring
+  -- matching instead; see the note on that class. The original Hebrew
+  -- catalogue made the case stronger still, because Hebrew attaches its
+  -- definite article to the front of a word (המטריקס = ה + מטריקס), so a
+  -- prefix search could never match the form a customer actually types.
 ) ENGINE = InnoDB;
 
 

@@ -34,7 +34,7 @@ public class LoginBean {
         try {
             User authenticated = userService.authenticate(username, password);
             session.login(authenticated);
-            Messages.info("ברוך הבא, " + authenticated.getFullName());
+            Messages.info("Welcome, " + authenticated.getFullName());
 
             if (returnTo != null && !returnTo.isBlank()) {
                 return returnTo + (returnTo.contains("?") ? "&" : "?") + "faces-redirect=true";

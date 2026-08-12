@@ -1,6 +1,6 @@
 /* =====================================================================
    Sartia - stylesheet
-   Right-to-left Hebrew interface.
+   Left-to-right English interface.
    ===================================================================== */
 
 :root {
@@ -26,10 +26,10 @@
 
 body {
     margin: 0;
-    font-family: "Segoe UI", "Arial Hebrew", Arial, sans-serif;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
     background: var(--canvas);
     color: var(--ink);
-    direction: rtl;
+    direction: ltr;
     line-height: 1.55;
 }
 
@@ -183,17 +183,53 @@ textarea { resize: vertical; min-height: 84px; }
     background: var(--surface);
     border: 1px solid var(--line);
     border-radius: var(--radius);
-    padding: 15px;
     box-shadow: var(--shadow);
     display: flex;
     flex-direction: column;
-    gap: 7px;
+    overflow: hidden;
     transition: box-shadow .15s ease, transform .15s ease;
 }
 
 .movie-card:hover {
     box-shadow: 0 5px 14px rgba(16, 24, 40, .11);
     transform: translateY(-2px);
+}
+
+/* Poster. The stored images are already normalised to 2:3, so cover fills the
+   frame edge to edge and crops nothing in practice. It is preferred over
+   contain because contain pads any mismatch with a dark band, which reads as a
+   rendering fault - most obviously around a poster with a white background.
+   The background colour below therefore only ever shows behind a missing
+   image, never around a present one. */
+.movie-card .cover {
+    display: block;
+    aspect-ratio: 2 / 3;
+    background: #0f1620;
+    border-bottom: 1px solid var(--line);
+}
+.movie-card .cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.cover-none {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 16px;
+    color: #8895a5;
+    font-size: .9rem;
+    text-align: center;
+}
+
+.movie-card .card-body {
+    padding: 14px 15px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    flex: 1;
 }
 
 .movie-card .title { font-weight: 650; font-size: 1.02rem; line-height: 1.3; }
@@ -207,12 +243,22 @@ textarea { resize: vertical; min-height: 84px; }
     overflow: hidden;
 }
 .movie-card .card-foot {
-    margin-top: auto;
-    padding-top: 9px;
+    margin: 12px 15px 0;
+    padding: 10px 0 14px;
     border-top: 1px solid var(--line);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 8px;
+}
+
+/* Poster on the film detail page, above the availability panel. */
+.detail-cover {
+    width: 100%;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    margin-bottom: 16px;
+    display: block;
 }
 
 /* ---------------- badges ---------------- */
@@ -240,7 +286,7 @@ table.data {
 
 table.data th, table.data td {
     padding: 10px 12px;
-    text-align: right;
+    text-align: left;
     border-bottom: 1px solid var(--line);
 }
 
@@ -274,7 +320,7 @@ table.data tbody tr:hover { background: #fafbfc; }
     font-size: .89rem;
     color: var(--ink);
     cursor: pointer;
-    text-align: right;
+    text-align: left;
 }
 .cat-list .lnk:hover { background: var(--brand-tint); text-decoration: none; }
 .cat-list .lnk.active { background: var(--brand); color: #fff; font-weight: 600; }

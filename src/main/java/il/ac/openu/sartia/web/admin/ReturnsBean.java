@@ -44,9 +44,9 @@ public class ReturnsBean implements Serializable {
         try {
             BigDecimal lateFee = rentalService.returnRental(rental.getId(), session.getUserId(), true);
             if (lateFee.signum() > 0) {
-                info("הוחזר: \"" + rental.getMovieTitle() + "\". קנס איחור: " + lateFee + " ש\"ח");
+                info("Returned: \"" + rental.getMovieTitle() + "\". Late fee: " + lateFee + " ₪");
             } else {
-                info("הוחזר: \"" + rental.getMovieTitle() + "\"");
+                info("Returned: \"" + rental.getMovieTitle() + "\"");
             }
         } catch (BusinessException failure) {
             error(failure.getMessage());
@@ -58,7 +58,7 @@ public class ReturnsBean implements Serializable {
     public void markLost(Rental rental) {
         try {
             rentalService.markCopyLost(rental.getId());
-            info("העותק " + rental.getBarcode() + " סומן כאבוד");
+            info("Copy " + rental.getBarcode() + " was marked as lost");
         } catch (BusinessException failure) {
             error(failure.getMessage());
         }

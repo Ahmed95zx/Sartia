@@ -14,14 +14,14 @@
         <f:viewParam name="returnTo" value="#{loginBean.returnTo}"/>
     </f:metadata>
 
-    <ui:define name="title">כניסה למערכת</ui:define>
+    <ui:define name="title">Sign in</ui:define>
 
     <ui:define name="content">
 
         <div class="narrow">
             <div class="panel">
-                <h1 class="page-title" style="font-size:1.35rem;">כניסה למערכת</h1>
-                <p class="page-subtitle">יש להזין שם משתמש וסיסמה</p>
+                <h1 class="page-title" style="font-size:1.35rem;">Sign in</h1>
+                <p class="page-subtitle">Enter your username and password</p>
 
                 <h:form id="loginForm">
                     <!-- The page is reached by a redirect carrying ?returnTo=...,
@@ -34,25 +34,25 @@
                     <h:inputHidden id="returnTo" value="#{loginBean.returnTo}"/>
 
                     <div class="field">
-                        <label for="loginForm:username">שם משתמש</label>
+                        <label for="loginForm:username">Username</label>
                         <h:inputText id="username" value="#{loginBean.username}" required="true"
-                                     requiredMessage="יש להזין שם משתמש"/>
+                                     requiredMessage="Please enter a username"/>
                         <h:message for="username" styleClass="field-error"/>
                     </div>
 
                     <div class="field">
-                        <label for="loginForm:password">סיסמה</label>
+                        <label for="loginForm:password">Password</label>
                         <h:inputSecret id="password" value="#{loginBean.password}" required="true"
-                                       requiredMessage="יש להזין סיסמה"/>
+                                       requiredMessage="Please enter a password"/>
                         <h:message for="password" styleClass="field-error"/>
                     </div>
 
                     <div class="form-actions">
                         <!-- Explicit id: without one JSF generates j_idtNN, which
                              shifts whenever a component is added above it. -->
-                        <h:commandButton id="submit" value="כניסה"
+                        <h:commandButton id="submit" value="Sign in"
                                          action="#{loginBean.login}" styleClass="btn"/>
-                        <h:link outcome="/register.xhtml" value="הרשמה" styleClass="btn btn-secondary"/>
+                        <h:link outcome="/register.xhtml" value="Register" styleClass="btn btn-secondary"/>
                     </div>
                 </h:form>
 
@@ -61,9 +61,9 @@
                      deployment would drop this block. -->
                 <div style="margin-top:22px;padding-top:16px;border-top:1px solid #e2e6ec;
                             font-size:.83rem;color:#5b6472;">
-                    <strong>משתמשי הדגמה:</strong><br/>
-                    מנהל — admin / admin123<br/>
-                    לקוח — david / david123
+                    <strong>Demo accounts:</strong><br/>
+                    Administrator — admin / admin123<br/>
+                    Customer — david / david123
                 </div>
             </div>
         </div>

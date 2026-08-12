@@ -21,14 +21,19 @@ import java.util.Optional;
  * updates was missed; deriving it cannot drift.
  *
  * <h2>Why the keyword search uses LIKE and not a FULLTEXT index</h2>
- * A MySQL FULLTEXT index matches whole words or prefixes of them. Hebrew writes
- * its definite article and several prepositions as letters attached to the
- * front of the word - {@code המטריקס} is "the Matrix", {@code מטריקס} with a
- * {@code ה} glued on. A prefix match for {@code מטריקס} therefore never finds
- * {@code המטריקס}, which is exactly the search a customer types. Substring
- * matching has no such blind spot, and against a catalogue of this size the
- * full scan it costs is not measurable. The index was removed rather than left
- * in place unused.
+ * A MySQL FULLTEXT index matches whole words or prefixes of them, so it cannot
+ * match a fragment from the middle of a word: searching {@code batman} would
+ * find nothing in "The Dark Knight", and a partial title such as {@code budap}
+ * would never reach "The Grand Budapest Hotel". Substring matching has no such
+ * blind spot, and against a catalogue of this size the full scan it costs is
+ * not measurable. The index was removed rather than left in place unused.
+ *
+ * <p>The original Hebrew catalogue made this decision sharper still: Hebrew
+ * attaches its definite article to the front of a word, so a prefix search for
+ * {@code מטריקס} could never match {@code המטריקס} - the very search a customer
+ * types. That was verified against the database before the index was dropped.
+ * Were the catalogue to grow to tens of thousands of titles, the right answer
+ * would be an external search engine, not a FULLTEXT index.
  */
 public class MovieDao {
 

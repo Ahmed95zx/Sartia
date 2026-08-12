@@ -49,7 +49,7 @@ class RentalLifecycleIT {
     @Test
     @DisplayName("renting removes a copy from the shelf and returning restores it")
     void rentThenReturnRestoresStock() {
-        long movieId = seedMovie("מחזור השאלה", 2);
+        long movieId = seedMovie("rental cycle", 2);
         long userId = seedUser("life");
 
         assertEquals(2, availableCopies(movieId), "both copies start on the shelf");
@@ -68,7 +68,7 @@ class RentalLifecycleIT {
     @Test
     @DisplayName("the rental stays in the customer's history after it is returned")
     void historySurvivesReturn() {
-        long movieId = seedMovie("היסטוריה", 1);
+        long movieId = seedMovie("history", 1);
         long userId = seedUser("hist");
 
         Rental rental = rentalService.rent(userId, movieId);
@@ -85,7 +85,7 @@ class RentalLifecycleIT {
     @Test
     @DisplayName("a customer cannot return someone else's rental")
     void cannotReturnAnotherCustomersRental() {
-        long movieId = seedMovie("החזרה זרה", 1);
+        long movieId = seedMovie("foreign return", 1);
         long owner = seedUser("owner");
         long stranger = seedUser("stranger");
 
@@ -102,7 +102,7 @@ class RentalLifecycleIT {
     @Test
     @DisplayName("an administrator may return any customer's rental")
     void adminMayReturnAnyRental() {
-        long movieId = seedMovie("החזרת מנהל", 1);
+        long movieId = seedMovie("admin return", 1);
         long customer = seedUser("cust");
         long admin = seedUser("adm");
 
@@ -115,7 +115,7 @@ class RentalLifecycleIT {
     @Test
     @DisplayName("returning the same rental twice is refused")
     void doubleReturnIsRefused() {
-        long movieId = seedMovie("החזרה כפולה", 1);
+        long movieId = seedMovie("double return", 1);
         long userId = seedUser("dbl2");
 
         Rental rental = rentalService.rent(userId, movieId);
@@ -130,7 +130,7 @@ class RentalLifecycleIT {
     @Test
     @DisplayName("renting a title with no copies left is refused")
     void outOfStockIsRefused() {
-        long movieId = seedMovie("אזל המלאי", 1);
+        long movieId = seedMovie("out of stock", 1);
         long first = seedUser("first");
         long second = seedUser("second");
 
@@ -138,7 +138,7 @@ class RentalLifecycleIT {
 
         ConflictException failure = assertThrows(ConflictException.class,
                 () -> rentalService.rent(second, movieId));
-        assertTrue(failure.getMessage().contains("מושאלים"),
+        assertTrue(failure.getMessage().contains("currently out"),
                 "the message should explain that every copy is out: " + failure.getMessage());
     }
 
@@ -152,7 +152,7 @@ class RentalLifecycleIT {
     @Test
     @DisplayName("a copy marked lost never returns to the shelf")
     void lostCopyLeavesCirculation() {
-        long movieId = seedMovie("עותק אבוד", 1);
+        long movieId = seedMovie("lost copy", 1);
         long userId = seedUser("lost");
 
         Rental rental = rentalService.rent(userId, movieId);
@@ -172,7 +172,7 @@ class RentalLifecycleIT {
     @Test
     @DisplayName("a title that has ever been lent cannot be deleted")
     void cannotDeleteTitleWithRentalHistory() {
-        long movieId = seedMovie("היסטוריה מונעת מחיקה", 1);
+        long movieId = seedMovie("history blocks delete", 1);
         long userId = seedUser("hist2");
 
         Rental rental = rentalService.rent(userId, movieId);
@@ -181,7 +181,7 @@ class RentalLifecycleIT {
         // Nothing is out on loan now, so only the history check can stop this.
         ConflictException failure = assertThrows(ConflictException.class,
                 () -> catalogService.deleteMovie(movieId));
-        assertTrue(failure.getMessage().contains("השאלה"),
+        assertTrue(failure.getMessage().contains("rental records"),
                 "the message should explain that rental records exist: " + failure.getMessage());
 
         assertEquals(1, availableCopies(movieId), "the title is still in the catalogue");
@@ -190,7 +190,7 @@ class RentalLifecycleIT {
     @Test
     @DisplayName("a title that was never lent can be deleted")
     void unusedTitleCanBeDeleted() {
-        long movieId = seedMovie("מעולם לא הושאל", 2);
+        long movieId = seedMovie("never rented", 2);
 
         catalogService.deleteMovie(movieId);
 
@@ -204,7 +204,7 @@ class RentalLifecycleIT {
     @Test
     @DisplayName("added copies never reuse a barcode after a gap in the sequence")
     void addedCopiesDoNotCollideAfterAGap() {
-        long movieId = seedMovie("רצף ברקודים", 3);
+        long movieId = seedMovie("barcode sequence", 3);
 
         // Remove the middle copy, leaving sequence 1 and 3 in place.
         Database.runInTransaction(connection -> {
@@ -262,7 +262,7 @@ class RentalLifecycleIT {
                     Statement.RETURN_GENERATED_KEYS)) {
                 statement.setString(1, unique);
                 statement.setString(2, unique + "@test.local");
-                statement.setString(3, "בדיקה " + unique);
+                statement.setString(3, "test " + unique);
                 statement.executeUpdate();
                 try (var keys = statement.getGeneratedKeys()) {
                     keys.next();

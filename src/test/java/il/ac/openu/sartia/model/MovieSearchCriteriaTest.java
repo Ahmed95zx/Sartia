@@ -51,7 +51,7 @@ class MovieSearchCriteriaTest {
         criteria.setKeyword("   ");
         assertFalse(criteria.hasKeyword());
 
-        criteria.setKeyword("מטריקס");
+        criteria.setKeyword("matrix");
         assertTrue(criteria.hasKeyword());
     }
 

@@ -101,7 +101,7 @@ public class RentalService {
             // that takes both does so in this order, which is what stops two of
             // them deadlocking by grabbing the pair in opposite orders.
             if (!userDao.lockUser(connection, userId)) {
-                throw new NotFoundException("המשתמש לא נמצא");
+                throw new NotFoundException("User not found");
             }
 
             Movie movie = movieDao.findById(connection, movieId)
@@ -112,12 +112,12 @@ public class RentalService {
             int alreadyOut = rentalDao.countOpenByUser(connection, userId);
             if (alreadyOut >= maxConcurrent) {
                 throw new ConflictException(
-                        "לא ניתן להשאיל יותר מ-" + maxConcurrent + " סרטים במקביל. "
-                        + "יש להחזיר סרט קיים לפני השאלת סרט נוסף.");
+                        "You may not rent more than " + maxConcurrent + " films at a time. "
+                        + "Please return one before renting another.");
             }
 
             if (rentalDao.hasOpenRentalOfMovie(connection, userId, movieId)) {
-                throw new ConflictException("הסרט \"" + movie.getTitle() + "\" כבר מושאל לך כעת.");
+                throw new ConflictException("You already have \"" + movie.getTitle() + "\" on loan.");
             }
 
             // --- reserve a physical copy ---
@@ -125,8 +125,8 @@ public class RentalService {
             OptionalLong lockedCopy = copyDao.lockAvailableCopy(connection, movieId);
             if (lockedCopy.isEmpty()) {
                 throw new ConflictException(
-                        "כל העותקים של \"" + movie.getTitle() + "\" מושאלים כרגע. "
-                        + "כדאי לנסות שוב מאוחר יותר.");
+                        "All copies of \"" + movie.getTitle() + "\" are currently out. "
+                        + "Please try again later.");
             }
             long copyId = lockedCopy.getAsLong();
 
@@ -134,7 +134,7 @@ public class RentalService {
             // It is still written conditionally: if the guarantee is ever weakened,
             // this fails loudly instead of silently double-lending a disc.
             if (!copyDao.updateStatus(connection, copyId, CopyStatus.AVAILABLE, CopyStatus.RENTED)) {
-                throw new ConflictException("העותק נתפס על ידי לקוח אחר. יש לנסות שוב.");
+                throw new ConflictException("That copy was taken by another customer. Please try again.");
             }
 
             try {
@@ -147,7 +147,7 @@ public class RentalService {
                 // uq_rentals_copy_active fired: the copy already had an open
                 // rental. Unreachable while the lock above is in place - kept so
                 // the invariant is enforced rather than merely assumed.
-                throw new ConflictException("העותק כבר מושאל. יש לנסות שוב.");
+                throw new ConflictException("That copy is already on loan. Please try again.");
             }
         });
     }
@@ -177,14 +177,14 @@ public class RentalService {
             }
 
             if (!rental.isOpen()) {
-                throw new ConflictException("ההשאלה כבר הוחזרה בתאריך " + rental.getReturnedAt().toLocalDate());
+                throw new ConflictException("This rental was already returned on " + rental.getReturnedAt().toLocalDate());
             }
 
             BigDecimal lateFee = rental.getProjectedLateFee();
 
             if (!rentalDao.close(connection, rentalId, lateFee)) {
                 // Another request closed it between our read and our write.
-                throw new ConflictException("ההשאלה כבר הוחזרה על ידי בקשה אחרת.");
+                throw new ConflictException("This rental was already returned by another request.");
             }
 
             // Checked, not assumed: if the copy is not in the state this rental
@@ -194,7 +194,7 @@ public class RentalService {
             if (!copyDao.updateStatus(connection, rental.getCopyId(),
                                       CopyStatus.RENTED, CopyStatus.AVAILABLE)) {
                 throw new ConflictException(
-                        "מצב העותק אינו תואם את ההשאלה. יש לרענן את המסך ולנסות שוב.");
+                        "The copy's state does not match the rental. Please refresh and try again.");
             }
 
             LOG.info(() -> "Returned rental " + rentalId + " (late fee " + lateFee + ")");
@@ -209,7 +209,7 @@ public class RentalService {
                     .orElseThrow(() -> NotFoundException.rental(rentalId));
 
             if (!rental.isOpen()) {
-                throw new ConflictException("לא ניתן לסמן כאבוד השאלה שכבר הוחזרה.");
+                throw new ConflictException("A rental that has already been returned cannot be marked as lost.");
             }
 
             rentalDao.close(connection, rentalId, rental.getProjectedLateFee());
@@ -217,7 +217,7 @@ public class RentalService {
             if (!copyDao.updateStatus(connection, rental.getCopyId(),
                                       CopyStatus.RENTED, CopyStatus.LOST)) {
                 throw new ConflictException(
-                        "מצב העותק אינו תואם את ההשאלה. יש לרענן את המסך ולנסות שוב.");
+                        "The copy's state does not match the rental. Please refresh and try again.");
             }
         });
     }

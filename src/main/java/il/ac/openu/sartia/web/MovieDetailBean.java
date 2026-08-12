@@ -78,14 +78,14 @@ public class MovieDetailBean implements Serializable {
     /** Rents a copy of this title to the signed-in customer. */
     public void rent() {
         if (!session.isLoggedIn()) {
-            Messages.error("יש להתחבר כדי להשאיל סרט");
+            Messages.error("You need to sign in to rent a film");
             return;
         }
 
         try {
             Rental rental = rentalService.rent(session.getUserId(), movieId);
-            Messages.info("הסרט \"" + movie.getTitle() + "\" הושאל בהצלחה. "
-                        + "יש להחזירו עד " + rental.getDueDate() + ".");
+            Messages.info("\"" + movie.getTitle() + "\" was rented successfully. "
+                        + "Please return it by " + rental.getDueDate() + ".");
         } catch (BusinessException failure) {
             Messages.error(failure.getMessage());
         }
@@ -98,13 +98,13 @@ public class MovieDetailBean implements Serializable {
     /** Saves the customer's rating and comment. */
     public void submitReview() {
         if (!session.isLoggedIn()) {
-            Messages.error("יש להתחבר כדי לכתוב ביקורת");
+            Messages.error("You need to sign in to write a review");
             return;
         }
 
         try {
             reviewService.submit(movieId, session.getUserId(), rating, comment);
-            Messages.info("הביקורת נשמרה. תודה!");
+            Messages.info("Your review was saved. Thank you!");
         } catch (BusinessException failure) {
             Messages.error(failure.getMessage());
         }

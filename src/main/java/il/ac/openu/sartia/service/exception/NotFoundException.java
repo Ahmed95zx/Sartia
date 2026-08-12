@@ -17,10 +17,10 @@ public class NotFoundException extends BusinessException {
     }
 
     public static NotFoundException movie(long id) {
-        return new NotFoundException("הסרט המבוקש (מזהה " + id + ") לא נמצא במערכת");
+        return new NotFoundException("The requested film (id " + id + ") was not found");
     }
 
     public static NotFoundException rental(long id) {
-        return new NotFoundException("ההשאלה המבוקשת (מזהה " + id + ") לא נמצאה במערכת");
+        return new NotFoundException("The requested rental (id " + id + ") was not found");
     }
 }
