@@ -13,20 +13,60 @@ import java.util.Objects;
  */
 public class Review implements Serializable {
 
+    /**
+     * Version stamp used when Java turns an object of this class into bytes.
+     *
+     * <p>These objects are held in JSF view and session scope, and a servlet
+     * container is allowed to serialise that state: to hand a session to
+     * another server, or to keep it across a restart. Fixing the number by
+     * hand means state written by an earlier build can still be read back
+     * after a field is added, instead of failing on a version mismatch.
+     */
     private static final long serialVersionUID = 1L;
 
+    /** Primary key. Stays {@code 0} until the row has been inserted. */
     private long id;
+
+    /** The title being reviewed. Foreign key to {@code movies.id}. */
     private long movieId;
+
+    /** Who wrote it. Foreign key to {@code users.id}. */
     private long userId;
+
+    /** Score from 1 to 5. The range is checked in the service and in the schema. */
     private int rating;
+
+    /** The written opinion. Optional: a customer may rate without writing. */
     private String comment;
+
+    /** When the review was written. Set by the database default. */
     private LocalDateTime createdAt;
 
-    /* --- joined for display --- */
+    /**
+     * Author's name, joined in by the query rather than stored on the row.
+     *
+     * <p>The film page lists reviews with their authors, and carrying the name
+     * on the object avoids looking each one up separately, which would cost
+     * one extra query per review shown.
+     */
     private String userFullName;
 
+    /** Empty constructor required by the JavaBean convention. */
     public Review() {
     }
+
+    /* ------------------------------------------------------------------
+     * Accessors.
+     *
+     * JSF reads and writes these by name from the pages: an expression
+     * such as #{movieBean.movie.title} calls getTitle(), and an input
+     * bound to the same expression calls setTitle() when the form is
+     * submitted. The DAO row mappers use them to fill an object from a
+     * JDBC result set.
+     *
+     * They carry no logic of their own, so they are described here as a group
+     * rather than repeating the same sentence above each one.
+     * ------------------------------------------------------------------ */
 
     public long getId() {
         return id;
@@ -84,6 +124,15 @@ public class Review implements Serializable {
         this.userFullName = userFullName;
     }
 
+    /**
+     * Identity is the database id: two objects describe the same review when they
+     * carry the same id.
+     *
+     * <p>The {@code id != 0} test is deliberate. An object built in memory but
+     * not yet inserted has no id, and without that test every unsaved object
+     * would compare equal to every other unsaved object. An unsaved object is
+     * therefore equal only to itself.
+     */
     @Override
     public boolean equals(Object other) {
         if (this == other) {
@@ -95,11 +144,19 @@ public class Review implements Serializable {
         return id != 0 && id == review.id;
     }
 
+    /**
+     * Built from the same field {@link #equals(Object)} compares.
+     *
+     * <p>Java requires this: two objects that are equal must return the same
+     * hash code, otherwise looking one up in a {@code HashMap} or
+     * {@code HashSet} quietly fails to find it.
+     */
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
     }
 
+    /** Short form for log messages and debugging. Never shown to a customer. */
     @Override
     public String toString() {
         return "Review{id=" + id + ", movieId=" + movieId + ", rating=" + rating + '}';

@@ -20,10 +20,25 @@
             #{myRentalsBean.remainingAllowance} rentals remaining
         </p>
 
+        <!--
+          Everything on this screen is read through #{myRentalsBean...}, the
+          name the bean publishes with its @Named annotation. The page holds no
+          data of its own: it renders whatever the bean loaded.
+        -->
+
         <!-- currently held -->
         <div class="panel">
             <h2>Currently rented</h2>
 
+            <!--
+              The empty case is written out as its own block rather than left to
+              produce a table with no rows. A customer who has nothing out gets
+              an explanation and a way to the catalogue instead of an empty
+              grid that looks like a fault.
+
+              ui:fragment groups components under one rendered condition without
+              adding any element of its own to the output.
+            -->
             <ui:fragment rendered="#{empty myRentalsBean.open}">
                 <div class="empty-state">
                     <div class="big">You have no films out at the moment</div>
@@ -46,14 +61,33 @@
                             </tr>
                         </thead>
                         <tbody>
+                            <!--
+                              ui:repeat renders its body once per item, binding
+                              each to the name in var. The row class is chosen
+                              with an EL conditional, so an overdue loan is
+                              highlighted without any Java deciding on colours.
+                            -->
                             <ui:repeat value="#{myRentalsBean.open}" var="rental">
                                 <tr class="#{rental.overdue ? 'row-overdue' : ''}">
                                     <td>
+                                        <!--
+                                          f:param adds a query parameter to the
+                                          link, producing /movie.xhtml?id=7.
+                                          That is the parameter the film page
+                                          picks up with its f:viewParam.
+                                        -->
                                         <h:link outcome="/movie.xhtml" value="#{rental.movieTitle}">
                                             <f:param name="id" value="#{rental.movieId}"/>
                                         </h:link>
                                     </td>
                                     <td>#{rental.barcode}</td>
+                                    <!--
+                                      f:convertDateTime formats the date for
+                                      display. Doing it here keeps formatting in
+                                      the presentation layer: the model carries
+                                      a real date object, not a string that has
+                                      already been committed to one layout.
+                                    -->
                                     <td>
                                         <h:outputText value="#{rental.rentedAt}">
                                             <f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy"/>
@@ -75,6 +109,14 @@
                                                       rendered="#{rental.overdue}"
                                                       style="font-size:.8rem;color:#b3261e;"/>
                                     </td>
+                                    <!--
+                                      The action passes the id of this row to the
+                                      bean method. Only the customer's own loans
+                                      are listed here, but that is what is drawn,
+                                      not what is enforced: the service checks
+                                      the loan against the session before
+                                      returning anything.
+                                    -->
                                     <td>
                                         <h:commandButton value="Return"
                                                          action="#{myRentalsBean.returnRental(rental.id)}"
@@ -88,6 +130,11 @@
             </ui:fragment>
         </div>
 
+        <!--
+          The history the specification requires a customer to be able to
+          review. Returned loans are kept rather than deleted, which is also
+          what lets the review rules ask whether someone ever rented a title.
+        -->
         <!-- history -->
         <div class="panel">
             <h2>Rental history</h2>

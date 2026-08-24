@@ -13,17 +13,27 @@ import jakarta.faces.context.FacesContext;
  */
 final class Messages {
 
+    /** Utility class: never instantiated, hence the private constructor. */
     private Messages() {
     }
 
+    /** Shows a green confirmation on the next page the user sees. */
     static void info(String text) {
         add(FacesMessage.SEVERITY_INFO, text);
     }
 
+    /** Shows a red failure notice on the next page the user sees. */
     static void error(String text) {
         add(FacesMessage.SEVERITY_ERROR, text);
     }
 
+    /**
+     * Queues one message on the current response.
+     *
+     * <p>The {@code null} first argument attaches it to the page as a whole
+     * rather than to a named input, which is what the message panel in the
+     * shared layout renders.
+     */
     private static void add(FacesMessage.Severity severity, String text) {
         FacesContext context = FacesContext.getCurrentInstance();
         context.addMessage(null, new FacesMessage(severity, text, null));

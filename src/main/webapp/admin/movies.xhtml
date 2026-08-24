@@ -17,6 +17,16 @@
         <h1 class="page-title">Manage Catalogue</h1>
         <p class="page-subtitle">Add, edit and remove films, and manage copy inventory</p>
 
+        <!--
+          The screen has three panels: this editor, an inventory panel, and the
+          catalogue table at the foot. The first two are drawn only when the
+          bean says they are open, so the administrator sees the table alone
+          until they choose to act on something.
+
+          Add and Edit are one form, not two. The bean decides which by whether
+          the title it is editing already has an id, and the heading follows the
+          same test, so there is one place that knows the difference.
+        -->
         <!-- editor -->
         <ui:fragment rendered="#{movieAdminBean.editorOpen}">
             <div class="panel">
@@ -36,6 +46,14 @@
 
                         <div class="field">
                             <label for="editForm:category">Category</label>
+                            <!--
+                              f:selectItems builds the drop down from the list
+                              the bean loaded, taking the stored value from one
+                              property and the visible text from another. The
+                              genres are therefore whatever the database holds,
+                              never a list repeated here that could fall out of
+                              step with it.
+                            -->
                             <h:selectOneMenu id="category" value="#{movieAdminBean.editing.categoryId}">
                                 <f:selectItems value="#{movieAdminBean.categories}" var="cat"
                                                itemValue="#{cat.id}" itemLabel="#{cat.name}"/>
@@ -102,6 +120,15 @@
             </div>
         </ui:fragment>
 
+        <!--
+          Inventory panel: the individual discs of one title, each with the
+          barcode printed on it. This is where the difference between a title
+          and a copy becomes visible to the user, and it is what an
+          administrator reads a barcode from when processing a return.
+
+          The status badge picks its colour with a nested EL conditional:
+          available reads as good, rented as a warning, lost as a problem.
+        -->
         <!-- inventory panel -->
         <ui:fragment rendered="#{movieAdminBean.inventoryMovieId ne 0}">
             <div class="panel">
@@ -138,6 +165,12 @@
                     <div class="toolbar">
                         <div style="flex:0 0 auto;">
                             <label for="addCopies">Copies to add</label>
+                            <!--
+                              Bound to an int on the bean, so JSF converts the
+                              text before the action runs and reports anything
+                              that is not a number as a conversion error rather
+                              than letting it reach the service.
+                            -->
                             <h:inputText id="addCopies" value="#{movieAdminBean.copiesToAdd}"
                                          style="width:90px;"/>
                         </div>
@@ -154,6 +187,11 @@
             </div>
         </ui:fragment>
 
+        <!--
+          The catalogue itself. Each row offers the three things an
+          administrator does to a title: edit its details, look at its discs,
+          or remove it.
+        -->
         <!-- catalogue table -->
         <div class="panel">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
@@ -202,6 +240,14 @@
                                                      styleClass="btn btn-secondary btn-sm"/>
                                     <h:commandButton value="Inventory" action="#{movieAdminBean.showInventory(movie)}"
                                                      styleClass="btn btn-secondary btn-sm"/>
+                                    <!--
+                                      The confirm box is a courtesy only. What
+                                      actually protects the data is the service
+                                      refusing to delete a title that has any
+                                      rental record, since removing it would
+                                      break the foreign key those rows rely on
+                                      and destroy the shop's history with it.
+                                    -->
                                     <h:commandButton value="Delete" action="#{movieAdminBean.delete(movie)}"
                                                      styleClass="btn btn-danger btn-sm"
                                                      onclick="return confirm('Permanently delete this film?');"/>

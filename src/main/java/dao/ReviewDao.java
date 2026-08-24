@@ -9,9 +9,15 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-/** Reads and writes {@code reviews}. */
+/**
+ * Reads and writes {@code reviews}.
+ *
+ * <p>As in every DAO here, the {@link Connection} is supplied by the caller so
+ * that the service layer owns the transaction.
+ */
 public class ReviewDao {
 
+    /** Turns one row into a {@link Review}, author's name included. */
     private static final RowMapper<Review> MAPPER = rs -> {
         Review review = new Review();
         review.setId(rs.getLong("id"));
@@ -24,6 +30,13 @@ public class ReviewDao {
         return review;
     };
 
+    /**
+     * The shared head of both read queries, joined to {@code users} so each
+     * review arrives with its author's name already attached.
+     *
+     * <p>Kept in one constant so the two methods below cannot drift apart, and
+     * so the join is written once rather than copied.
+     */
     private static final String SELECT_REVIEW = """
             SELECT r.id, r.movie_id, r.user_id, r.rating, r.comment, r.created_at,
                    u.full_name AS user_full_name
@@ -31,6 +44,14 @@ public class ReviewDao {
             JOIN   users u ON u.id = r.user_id
             """;
 
+    /**
+     * Every review of one title, newest first.
+     *
+     * <p>The id goes in through {@code setLong} on a placeholder rather than
+     * being pasted into the SQL text. That is what makes SQL injection
+     * impossible here: the driver sends the value separately from the
+     * statement, so it can never be read as SQL.
+     */
     public List<Review> findByMovie(Connection connection, long movieId) throws SQLException {
         String sql = SELECT_REVIEW + " WHERE r.movie_id = ? ORDER BY r.created_at DESC";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -41,6 +62,14 @@ public class ReviewDao {
         }
     }
 
+    /**
+     * One customer's review of one title, if they have written one.
+     *
+     * <p>Returns {@link Optional} rather than {@code null}, so the caller has to
+     * face the "no review yet" case instead of discovering it as a
+     * {@code NullPointerException}. The unique index on (movie, user)
+     * guarantees there is at most one row to find.
+     */
     public Optional<Review> findByMovieAndUser(Connection connection, long movieId, long userId) throws SQLException {
         String sql = SELECT_REVIEW + " WHERE r.movie_id = ? AND r.user_id = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {

@@ -17,6 +17,11 @@
         <h1 class="page-title">Open Rentals</h1>
         <p class="page-subtitle">Track films that are out and process returns</p>
 
+        <!--
+          The two counters. The overdue one gains an alert class when it is
+          above zero, chosen by an EL conditional, so the number that needs
+          attention colours itself.
+        -->
         <div class="stat-row">
             <div class="stat">
                 <div class="n">#{returnsBean.openRentals.size()}</div>
@@ -54,6 +59,12 @@
                             </tr>
                         </thead>
                         <tbody>
+                            <!--
+                              One row per open loan, across every customer. The
+                              customer columns come from fields the DAO joined
+                              onto the rental, which is why the page can show a
+                              borrower without a query of its own per row.
+                            -->
                             <ui:repeat value="#{returnsBean.openRentals}" var="rental">
                                 <tr class="#{rental.overdue ? 'row-overdue' : ''}">
                                     <td>
@@ -94,6 +105,13 @@
                                         <h:commandButton value="Return"
                                                          action="#{returnsBean.processReturn(rental)}"
                                                          styleClass="btn btn-sm"/>
+                                        <!--
+                                          Writing a disc off cannot be undone
+                                          from the interface, so it asks first.
+                                          Returning false from onclick cancels
+                                          the submission, which is what a
+                                          dismissed confirm box produces.
+                                        -->
                                         <h:commandButton value="Mark as lost"
                                                          action="#{returnsBean.markLost(rental)}"
                                                          styleClass="btn btn-danger btn-sm"

@@ -26,20 +26,46 @@ public class CatalogBean implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /** Business layer: runs the search and counts the categories. */
     @Inject
     private CatalogService catalogService;
 
+    /**
+     * Every filter the customer has chosen, in one object.
+     *
+     * <p>The page binds its inputs straight to the fields of this object, so a
+     * new filter means adding a field there and an input on the page, without
+     * touching the method signatures in between.
+     */
     private MovieSearchCriteria criteria = new MovieSearchCriteria();
+
+    /** The current page of results, together with the total count and paging flags. */
     private CatalogService.SearchResult result;
+
+    /** Sidebar entries, each carrying how many titles it holds. */
     private List<Category> categories;
 
+    /**
+     * Loads the sidebar once and runs the first, unfiltered search.
+     *
+     * <p>Runs after CDI has filled the injected fields; a constructor would be
+     * too early, as {@code catalogService} would still be {@code null}. The
+     * categories are read once here rather than on every search, because they
+     * do not change while the customer is on the page.
+     */
     @PostConstruct
     public void init() {
         categories = catalogService.categoriesWithCounts();
         runSearch();
     }
 
-    /** Applies changed filters, always restarting from page one. */
+    /**
+     * Applies changed filters, always restarting from page one.
+     *
+     * <p>Resetting the page matters: a customer sitting on page 5 who then
+     * narrows the search to three results would otherwise be shown an empty
+     * page 5 and conclude that nothing matched.
+     */
     public void search() {
         criteria.resetPaging();
         runSearch();
@@ -58,6 +84,13 @@ public class CatalogBean implements Serializable {
         runSearch();
     }
 
+    /**
+     * Moves forward one page, if there is one.
+     *
+     * <p>The guard is not only about the button being hidden. A page can be
+     * re-submitted from a stale screen after the catalogue has changed, so the
+     * bean re-checks rather than trusting that the page would not have asked.
+     */
     public void nextPage() {
         if (result != null && result.isHasNext()) {
             criteria.setPage(criteria.getPage() + 1);
@@ -65,6 +98,7 @@ public class CatalogBean implements Serializable {
         }
     }
 
+    /** Moves back one page, if there is one. Guarded as {@link #nextPage()} is. */
     public void previousPage() {
         if (result != null && result.isHasPrevious()) {
             criteria.setPage(criteria.getPage() - 1);
@@ -88,9 +122,18 @@ public class CatalogBean implements Serializable {
         runSearch();
     }
 
+    /**
+     * Runs the query for the current criteria.
+     *
+     * <p>Every action above ends here rather than each doing its own query,
+     * so there is one place where searching happens and no way for a new
+     * action to forget a step.
+     */
     private void runSearch() {
         result = catalogService.search(criteria);
     }
+
+    /* Read by catalog.xhtml through #{catalogBean...}. */
 
     public MovieSearchCriteria getCriteria() {
         return criteria;

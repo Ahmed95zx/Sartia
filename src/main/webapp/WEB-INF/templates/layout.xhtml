@@ -13,10 +13,27 @@
       xmlns:ui="jakarta.faces.facelets"
       lang="en" dir="ltr">
 
+<!--
+  h:head and h:body are the JSF versions of the plain HTML tags. They look the
+  same in the output, but they give the framework somewhere to add what it
+  needs: h:head is where stylesheets registered by h:outputStylesheet are
+  written out, and h:body is where JSF places the resources a component asks
+  for. Using plain head and body would silently drop them.
+-->
 <h:head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <!--
+      ui:insert marks a hole that each page fills with a matching ui:define.
+      The text inside it is the default used by any page that does not.
+    -->
     <title><ui:insert name="title">Sartia</ui:insert> · Sartia</title>
+
+    <!--
+      Referenced by library and name rather than by path. JSF resolves it to
+      /resources/css/sartia.css and appends a version marker, so a browser
+      picks up a changed stylesheet instead of serving a cached copy.
+    -->
     <h:outputStylesheet library="css" name="sartia.css"/>
 </h:head>
 
@@ -28,6 +45,16 @@
                 Sartia<span>Movie Rentals</span>
             </h:link>
 
+            <!--
+              The rendered attribute decides whether a component is written to
+              the page at all, so a signed out visitor receives no markup for
+              these links rather than hidden markup.
+
+              This is convenience, not security. A visitor who types the
+              address of a link they cannot see still reaches the server, and
+              AuthFilter is what turns them away. The navigation reflects the
+              rule; it does not enforce it.
+            -->
             <nav class="main-nav">
                 <h:link outcome="/catalog.xhtml" value="Catalogue"/>
 
@@ -44,6 +71,12 @@
             <div class="user-area">
                 <ui:fragment rendered="#{userSession.loggedIn}">
                     <span class="who">Hello, #{userSession.displayName}</span>
+                    <!--
+                      Sign out is a button inside a form, not a link, because it
+                      changes something on the server. A browser or a proxy may
+                      fetch a link on its own to preheat it, which with a link
+                      would sign the user out behind their back.
+                    -->
                     <h:form>
                         <h:commandButton value="Sign out" action="#{userSession.logout}"
                                          styleClass="btn btn-secondary btn-sm"/>
@@ -58,6 +91,11 @@
         </div>
     </header>
 
+    <!--
+      ui:insert name="content" further down is where each screen is placed.
+      Everything around it, header and footer included, is written once here,
+      so a change to the chrome reaches every page at once.
+    -->
     <main class="page">
         <!-- globalOnly: messages attached to a specific input are rendered
              beside that input by the page itself, not repeated up here. -->

@@ -23,6 +23,12 @@
 
     <ui:define name="content">
 
+        <!--
+          The whole page is one of two alternatives. When the id in the address
+          matched nothing the bean leaves the film null, and this block explains
+          that with a way back, instead of the container's generic error page
+          which would say nothing useful about a mistyped id.
+        -->
         <ui:fragment rendered="#{empty movieBean.movie}">
             <div class="panel empty-state">
                 <div class="big">Film not found</div>
@@ -64,6 +70,12 @@
                             <dt>Category</dt>
                             <dd>#{movieBean.movie.categoryName}</dd>
 
+                            <!--
+                              f:convertNumber formats the amount to two decimal
+                              places for display. The value itself stays a
+                              BigDecimal in the model; only its presentation is
+                              decided here.
+                            -->
                             <dt>Daily price</dt>
                             <dd>
                                 <h:outputText value="#{movieBean.movie.dailyPrice}">
@@ -110,7 +122,19 @@
                             </div>
                         </ui:repeat>
 
-                        <!-- Only customers who rented the title may review it. -->
+                        <!--
+                          Only customers who rented the title may review it, so
+                          the form is not drawn for anyone else. As everywhere in
+                          this project, the hidden form is the courtesy and the
+                          service is the control: ReviewService checks the same
+                          rule again and refuses a submission that reaches it by
+                          another route.
+
+                          If the customer has reviewed this film before, the bean
+                          has already loaded their rating and text into the form,
+                          so this visibly edits that review rather than adding a
+                          second one.
+                        -->
                         <ui:fragment rendered="#{movieBean.mayReview}">
                             <h:form styleClass="panel" style="margin-top:18px;box-shadow:none;background:#f5f7fa;">
                                 <h2 style="font-size:1rem;">Your review</h2>
@@ -161,6 +185,19 @@
                         <dd>#{movieBean.movie.availableCopies}</dd>
                     </dl>
 
+                    <!--
+                      The rent control has three states: a working button, a
+                      disabled button with the reason spelled out underneath,
+                      and an invitation to sign in. Saying why the button is
+                      disabled matters, because "all copies out", "you already
+                      have this film" and "you have reached your limit" call for
+                      quite different things from the customer.
+
+                      Disabling is drawn when the page renders and can be stale
+                      by the time it is pressed. The last copy may be taken by
+                      somebody else in between, and only the transaction in the
+                      service settles who got it.
+                    -->
                     <h:form style="margin-top:16px;">
                         <ui:fragment rendered="#{userSession.loggedIn}">
                             <h:commandButton value="Rent this film" action="#{movieBean.rent}"

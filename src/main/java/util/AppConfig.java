@@ -15,8 +15,16 @@ import java.util.Properties;
  */
 public final class AppConfig {
 
+    /**
+     * The file's contents, read once when the class is first used.
+     *
+     * <p>Java loads a class lazily and initialises its static fields exactly
+     * once, so this reads the file a single time for the whole application
+     * without any locking of our own.
+     */
     private static final Properties PROPERTIES = load();
 
+    /** Utility class: never instantiated, hence the private constructor. */
     private AppConfig() {
     }
 
@@ -44,6 +52,17 @@ public final class AppConfig {
         }
     }
 
+    /**
+     * Reads a whole-number setting.
+     *
+     * <p>A JVM system property is consulted before the file, which is what lets
+     * the same WAR be started against different settings without rebuilding:
+     * {@code java -Drental.periodDays=14 ...} overrides the file.
+     *
+     * <p>Every failure path ends at the supplied default: a missing key, a blank
+     * value, or text that is not a number. A typo in a configuration file should
+     * make the shop use its normal lending period, not refuse to open.
+     */
     private static int intValue(String key, int fallback) {
         String raw = System.getProperty(key, PROPERTIES.getProperty(key));
         if (raw == null || raw.isBlank()) {
@@ -58,6 +77,17 @@ public final class AppConfig {
         }
     }
 
+    /**
+     * Reads {@code sartia.properties} from the classpath.
+     *
+     * <p>Loaded through the class loader rather than as a file path, because
+     * inside a deployed WAR the file is an entry in an archive and has no path
+     * on disk to open.
+     *
+     * <p>A missing file is tolerated - every getter above has a default - but a
+     * file that exists and cannot be read is not, since that points at a real
+     * problem worth failing loudly for.
+     */
     private static Properties load() {
         Properties properties = new Properties();
         try (InputStream in = AppConfig.class.getClassLoader().getResourceAsStream("sartia.properties")) {

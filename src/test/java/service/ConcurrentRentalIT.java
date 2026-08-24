@@ -221,6 +221,16 @@ class ConcurrentRentalIT {
      * Starts one thread per customer, holds them all on a latch, then releases
      * them together so the calls overlap as tightly as the machine allows.
      */
+    /**
+     * Runs one race and reports what happened.
+     *
+     * <p>Simply starting threads in a loop would not test much: the first would
+     * often finish before the last had started, and the calls would barely
+     * overlap. Instead every thread is started and then blocked on a shared
+     * latch, so they all sit waiting at the same point. Counting the latch down
+     * releases them together, which is as close to simultaneous as the machine
+     * allows and gives the race the best chance to expose a flaw.
+     */
     private RaceOutcome raceToRent(int customers) throws Exception {
         CountDownLatch startLine = new CountDownLatch(1);
         ExecutorService pool = Executors.newFixedThreadPool(customers);
@@ -238,6 +248,15 @@ class ConcurrentRentalIT {
         }
     }
 
+    /**
+     * One customer's attempt, as a task for the thread pool.
+     *
+     * <p>The distinction between the two catch blocks is the whole point of the
+     * test. A {@link ConflictException} is a correct answer: it means the
+     * system refused in an orderly way because the stock had gone. Any other
+     * runtime exception is a failure of the design, so it is captured with its
+     * message rather than swallowed, and reported at the end.
+     */
     private Callable<String> attemptRent(long userId, CountDownLatch startLine) {
         return () -> {
             startLine.await();
@@ -252,6 +271,13 @@ class ConcurrentRentalIT {
         };
     }
 
+    /**
+     * Waits for every attempt and tallies the outcomes.
+     *
+     * <p>{@code future.get} with a timeout rather than an open-ended wait: if
+     * the locking were wrong in a way that deadlocked, an untimed wait would
+     * hang the build with no explanation, while this fails the test instead.
+     */
     private RaceOutcome collect(List<Future<String>> futures) throws Exception {
         AtomicInteger ok = new AtomicInteger();
         AtomicInteger conflict = new AtomicInteger();

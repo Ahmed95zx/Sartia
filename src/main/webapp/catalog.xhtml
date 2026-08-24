@@ -10,6 +10,14 @@
                 xmlns:a="jakarta.faces.passthrough"
                 template="/WEB-INF/templates/layout.xhtml">
 
+    <!--
+      Each xmlns above brings in one tag library: h for the HTML components,
+      f for the core tags such as parameters and converters, ui for templating
+      and repetition, and a for passthrough attributes. A passthrough attribute
+      is one JSF has no component for and writes to the output unchanged, which
+      is how the HTML5 placeholder on the search box below is produced.
+    -->
+
     <ui:define name="title">Film Catalogue</ui:define>
 
     <ui:define name="content">
@@ -24,6 +32,15 @@
 
         <div class="layout-2col">
 
+            <!--
+              Category sidebar. Each entry is a commandLink rather than a plain
+              link: it posts back and calls a bean method, so the chosen
+              category becomes part of the filters the bean already holds
+              instead of a separate address to parse.
+
+              The counts beside the names come from the query that loads the
+              sidebar, so an empty category still appears, showing zero.
+            -->
             <!-- categories -->
             <aside class="panel">
                 <h2>Categories</h2>
@@ -52,6 +69,14 @@
             <section>
 
                 <div class="panel">
+                    <!--
+                      Every control here binds to a field of the criteria object
+                      the bean holds, so pressing Search submits the whole set of
+                      filters at once and the bean hands that one object to the
+                      service. Adding a filter later means adding a field there
+                      and an input here, with no method signature to change in
+                      between.
+                    -->
                     <h:form id="searchForm">
                         <div class="toolbar">
                             <div class="grow">
@@ -82,6 +107,13 @@
                             <div style="flex:0 0 auto;">
                                 <h:commandButton value="Search" action="#{catalogBean.search}" styleClass="btn"/>
                             </div>
+                            <!--
+                              immediate="true" makes Clear skip validation and
+                              run straight away. Without it, clearing the filters
+                              while a box held something invalid would fail
+                              validation and refuse the very action meant to get
+                              the user out of that state.
+                            -->
                             <div style="flex:0 0 auto;">
                                 <h:commandButton value="Clear" action="#{catalogBean.clearFilters}"
                                                  styleClass="btn btn-secondary" immediate="true"/>
@@ -146,6 +178,12 @@
                                     </div>
                                 </div>
 
+                                <!--
+                                  Availability comes from the counts the search
+                                  query derived, not from a stored column, so a
+                                  card cannot advertise stock that a return or a
+                                  rental has since changed on another row.
+                                -->
                                 <div class="card-foot">
                                     <h:outputText value="Available (#{movie.availableCopies})"
                                                   styleClass="badge badge-ok"
@@ -162,6 +200,12 @@
                         </ui:repeat>
                     </div>
 
+                    <!--
+                      Paging. The buttons disable themselves at the ends of the
+                      result set, and the bean checks the same condition again
+                      before acting, because a page held open while the
+                      catalogue changed can still submit a stale request.
+                    -->
                     <!-- paging -->
                     <h:form>
                         <div class="pager">

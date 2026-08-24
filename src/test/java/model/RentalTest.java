@@ -11,9 +11,31 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** Unit tests for the overdue and late-fee rules. No database required. */
+/**
+ * Unit tests for the overdue and late-fee rules. No database required.
+ *
+ * <p>Money and dates are where quiet mistakes are expensive, so each rule gets
+ * its own test: the boundary on the due date itself, one day past, several days
+ * past, and a rental that came back late.
+ *
+ * <p>Written with JUnit 5. Three pieces of it appear throughout:
+ * {@code @Test} marks one method as a test the framework should run;
+ * {@code @DisplayName} gives that test the readable sentence that appears in
+ * the report, which is why the method names can stay short; and the
+ * {@code assert...} calls state what must be true, failing the test with the
+ * expected and actual values when it is not.
+ *
+ * <p>Each test builds its own data and makes no assumption about what the
+ * others did, so they can be run in any order or on their own.
+ */
 class RentalTest {
 
+    /**
+     * Builds an open rental due on the given date.
+     *
+     * <p>The dates are relative to today rather than fixed, so the tests still
+     * mean what they say next month instead of quietly expiring.
+     */
     private static Rental open(LocalDate dueDate) {
         Rental rental = new Rental();
         rental.setRentedAt(LocalDateTime.now().minusDays(3));
@@ -51,6 +73,11 @@ class RentalTest {
         assertAmount("9.00", rental.getProjectedLateFee());
     }
 
+    /*
+     * The boundary case, and the one most likely to be got wrong. A customer
+     * still has the whole of the due day; charging them on the morning it falls
+     * due would be a fee for being on time.
+     */
     @Test
     @DisplayName("due today is not yet overdue")
     void dueTodayIsNotOverdue() {

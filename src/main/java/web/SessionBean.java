@@ -24,6 +24,14 @@ public class SessionBean implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * The signed-in account, or {@code null} when nobody is signed in.
+     *
+     * <p>{@code @SessionScoped} means one instance of this bean per browser
+     * session, so this field is what makes a login persist from one request to
+     * the next. It is the only mutable state the application keeps between
+     * requests; everything else is read from the database each time.
+     */
     private User user;
 
     /**
@@ -57,16 +65,30 @@ public class SessionBean implements Serializable {
         this.user = authenticated;
     }
 
-    /** Ends the session and returns the customer to the catalogue. */
+    /**
+     * Ends the session and returns the customer to the catalogue.
+     *
+     * <p>Invalidating is right here, and wrong in {@link #login(User)}. On the
+     * way out, destroying every session-scoped bean is exactly the intent: no
+     * fragment of the previous user should survive for whoever uses the browser
+     * next.
+     */
     public String logout() {
         FacesContext.getCurrentInstance().getExternalContext().invalidateSession();
         return "/catalog.xhtml?faces-redirect=true";
     }
 
+    /** @return whether anybody is signed in on this session. */
     public boolean isLoggedIn() {
         return user != null;
     }
 
+    /**
+     * @return whether the signed-in account may manage the catalogue.
+     *
+     * <p>Read both by {@code AuthFilter}, where it decides access, and by the
+     * pages, where it only decides what to draw.
+     */
     public boolean isAdmin() {
         return user != null && user.getRole() == Role.ADMIN;
     }
@@ -76,6 +98,7 @@ public class SessionBean implements Serializable {
         return user == null ? 0L : user.getId();
     }
 
+    /** @return the name to greet in the header, or empty when signed out. */
     public String getDisplayName() {
         return user == null ? "" : user.getFullName();
     }

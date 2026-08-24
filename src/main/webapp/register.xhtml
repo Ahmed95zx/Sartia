@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Customer self-registration. -->
+<!--
+  Customer self-registration.
+
+  ui:composition with a template attribute is what makes this a page in the
+  shared frame: everything outside the ui:define blocks below is discarded,
+  and each block is dropped into the ui:insert of the same name in the layout.
+-->
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="jakarta.faces.html"
                 xmlns:ui="jakarta.faces.facelets"
@@ -14,7 +20,28 @@
                 <h1 class="page-title" style="font-size:1.35rem;">Create an account</h1>
                 <p class="page-subtitle">An account is required to rent films and write reviews</p>
 
+                <!--
+                  h:form renders an HTML form that posts back to this same page.
+                  JSF also writes a hidden field into it holding the view state,
+                  which is how the server recognises the page a submission came
+                  from and rebuilds the right component tree to receive it.
+
+                  The id given here prefixes the ids of everything inside, which
+                  is why the labels point at regForm:username rather than plain
+                  username.
+                -->
                 <h:form id="regForm">
+                    <!--
+                      value binds the input to a bean field in both directions:
+                      the field supplies what is displayed, and submitting the
+                      form writes what was typed back into it.
+
+                      required and requiredMessage are validation declared on
+                      the page, so an empty box is caught before any Java of
+                      ours runs. h:message shows the result beside its own
+                      input, which is why the layout renders only global
+                      messages and does not repeat these at the top.
+                    -->
                     <div class="field">
                         <label for="regForm:username">Username</label>
                         <h:inputText id="username" value="#{registerBean.username}" required="true"
@@ -61,6 +88,13 @@
                         The password must be at least 8 characters long.
                     </p>
 
+                    <!--
+                      Two controls that look alike and are not. h:commandButton
+                      posts the form and calls the action method, whose returned
+                      outcome decides the next page. h:link renders an ordinary
+                      anchor that fetches another page with GET, submitting
+                      nothing and calling no bean method.
+                    -->
                     <div class="form-actions">
                         <h:commandButton value="Register" action="#{registerBean.register}" styleClass="btn"/>
                         <h:link outcome="/login.xhtml" value="Already registered? Sign in" styleClass="btn btn-secondary"/>

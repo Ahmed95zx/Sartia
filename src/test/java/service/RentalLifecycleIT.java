@@ -27,6 +27,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * <p>Complements {@code ConcurrentRentalIT}, which covers the same operations
  * under contention. Requires MySQL with {@code db/schema.sql} applied.
+ *
+ * <p>An <em>integration</em> test rather than a unit test: it deliberately uses
+ * the real database instead of a stand-in. Most of what is being checked here
+ * is the agreement between the Java code and the schema - foreign keys, the
+ * unique index, generated columns - and a stand-in would simply agree with
+ * whatever the code did and prove nothing.
+ *
+ * <p>That is also why these are named {@code *IT} and carry {@code @Tag}. The
+ * build runs them in a separate phase from the unit tests, so a developer with
+ * no database can still run the fast suite.
+ *
+ * <p>Each test seeds its own film and its own customers through the helpers at
+ * the foot of the class, so no test depends on the demo data or on another
+ * test having run first.
  */
 @Tag("integration")
 class RentalLifecycleIT {
@@ -82,6 +96,12 @@ class RentalLifecycleIT {
                 "but it is no longer among the discs the customer holds");
     }
 
+    /*
+     * The authorisation rule, checked in the business layer rather than in the
+     * page. The web form only ever offers the customer their own loans, but
+     * that is a matter of what is drawn on screen; anyone can submit a
+     * different id by hand, and this is what refuses it.
+     */
     @Test
     @DisplayName("a customer cannot return someone else's rental")
     void cannotReturnAnotherCustomersRental() {
@@ -112,6 +132,11 @@ class RentalLifecycleIT {
         assertEquals(1, availableCopies(movieId));
     }
 
+    /*
+     * The mirror of the double-rental race: a refresh or a second click must
+     * not credit a return twice, which would put a disc back on the shelf that
+     * is already there and could charge a second late fee.
+     */
     @Test
     @DisplayName("returning the same rental twice is refused")
     void doubleReturnIsRefused() {
@@ -169,6 +194,13 @@ class RentalLifecycleIT {
      * to pass the service's checks and then fail on the foreign key, surfacing
      * as an error page instead of an explanation.
      */
+    /*
+     * Regression test for a real bug. Deleting checked only for currently open
+     * loans, so a title whose every disc had come back passed the check and
+     * then failed on the foreign key from the returned rental rows, showing the
+     * administrator a server error page. The rule is now "any rental record at
+     * all", which is what the foreign key actually requires.
+     */
     @Test
     @DisplayName("a title that has ever been lent cannot be deleted")
     void cannotDeleteTitleWithRentalHistory() {
@@ -201,6 +233,12 @@ class RentalLifecycleIT {
      * Regression test. The barcode sequence was derived from a row count, which
      * reissues a barcode already in use once any copy row is missing.
      */
+    /*
+     * Regression test for a real bug. The method that chose the next barcode
+     * was named for a maximum but ran COUNT(*), so once a disc had been removed
+     * the count no longer matched the highest number in use and the next disc
+     * was issued a barcode that already existed. This seeds exactly that gap.
+     */
     @Test
     @DisplayName("added copies never reuse a barcode after a gap in the sequence")
     void addedCopiesDoNotCollideAfterAGap() {
@@ -226,6 +264,12 @@ class RentalLifecycleIT {
      * Fixture
      * ------------------------------------------------------------------ */
 
+    /**
+     * Creates a film with the given number of discs and returns its id.
+     *
+     * <p>Titles are given a unique suffix so that repeated runs cannot collide
+     * with rows left behind by an earlier one.
+     */
     private long seedMovie(String title, int copies) {
         return Database.inTransaction(connection -> {
             long id;
@@ -253,6 +297,7 @@ class RentalLifecycleIT {
         });
     }
 
+    /** Registers a throwaway customer for one test and returns their id. */
     private long seedUser(String prefix) {
         String unique = prefix + "_" + System.nanoTime();
         return Database.inTransaction(connection -> {
