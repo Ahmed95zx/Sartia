@@ -4,9 +4,8 @@
 --  Run after schema.sql. Safe to re-run: it clears the tables it fills.
 --
 --  The password_hash values below are genuine PBKDF2-HMAC-SHA256 hashes
---  produced by il.ac.openu.sartia.util.Passwords, not placeholders. To
---  mint new ones:
---      java -cp target/classes il.ac.openu.sartia.util.Passwords <password>
+--  produced by util.Passwords, not placeholders. To mint new ones:
+--      java -cp target/classes util.Passwords <password>
 --
 --  Cover images are stored under src/main/webapp/images/covers and are
 --  referenced by an application-relative path, so the catalogue renders
@@ -105,7 +104,46 @@ INSERT INTO movies (id, title, description, director, release_year, duration_min
       'Matt Reeves', 2014, 130, 4, '/images/covers/14.jpg', 5.50),
  (15, 'Man on Wire',
       'The story of a high-wire artist on his way to walking between the Twin Towers.',
-      'James Marsh', 2008, 94, 7, '/images/covers/15.jpg', 4.50);
+      'James Marsh', 2008, 94, 7, '/images/covers/15.jpg', 4.50),
+ (16, 'Die Hard',
+      'A New York detective takes on a group of armed thieves who have seized a Los Angeles office tower.',
+      'John McTiernan', 1988, 132, 1, '/images/covers/16.jpg', 5.50),
+ (17, 'Gladiator',
+      'A betrayed Roman general is sold into slavery and fights his way back to confront the emperor who destroyed his family.',
+      'Ridley Scott', 2000, 155, 1, '/images/covers/17.jpg', 6.00),
+ (18, 'Groundhog Day',
+      'A cynical weatherman is trapped reliving the same day until he learns to live it differently.',
+      'Harold Ramis', 1993, 101, 2, '/images/covers/18.jpg', 5.00),
+ (19, 'The Big Lebowski',
+      'A case of mistaken identity drags an easy-going Los Angeles slacker into a kidnapping plot.',
+      'Joel and Ethan Coen', 1998, 117, 2, '/images/covers/19.jpg', 5.00),
+ (20, 'Interstellar',
+      'A team of explorers travels through a wormhole in search of a new home for humanity.',
+      'Christopher Nolan', 2014, 169, 4, '/images/covers/20.jpg', 6.50),
+ (21, 'Toy Story',
+      'A cowboy doll fears replacement when a spaceman toy becomes the new favourite.',
+      'John Lasseter', 1995, 81, 5, '/images/covers/21.jpg', 5.00),
+ (22, 'Coco',
+      'A boy who dreams of music crosses into the Land of the Dead to uncover his family history.',
+      'Lee Unkrich', 2017, 105, 5, '/images/covers/22.jpg', 5.50),
+ (23, 'The Shining',
+      'A caretaker and his family spend a winter alone in an empty hotel, and the isolation begins to work on him.',
+      'Stanley Kubrick', 1980, 146, 6, '/images/covers/23.jpg', 5.50),
+ (24, 'Get Out',
+      'A weekend visit to the family of his girlfriend turns steadily more sinister.',
+      'Jordan Peele', 2017, 104, 6, '/images/covers/24.jpg', 5.50),
+ (25, 'A Quiet Place',
+      'A family lives in silence to hide from creatures that hunt by sound.',
+      'John Krasinski', 2018, 90, 6, '/images/covers/25.jpg', 5.50),
+ (26, 'March of the Penguins',
+      'Emperor penguins cross the Antarctic ice each year to breed in one of the harshest places on Earth.',
+      'Luc Jacquet', 2005, 80, 7, '/images/covers/26.jpg', 4.50),
+ (27, 'Free Solo',
+      'A climber prepares to scale El Capitan with no ropes and no safety equipment.',
+      'Elizabeth Chai Vasarhelyi and Jimmy Chin', 2018, 100, 7, '/images/covers/27.jpg', 5.00),
+ (28, 'Searching for Sugar Man',
+      'Two fans set out to discover what became of a forgotten American musician who had found fame elsewhere.',
+      'Malik Bendjelloul', 2012, 86, 7, '/images/covers/28.jpg', 4.50);
 
 
 -- ---------------------------------------------------------------------
@@ -129,7 +167,20 @@ INSERT INTO copies (movie_id, barcode, status) VALUES
  (12, 'SRT-12-001', 'AVAILABLE'),
  (13, 'SRT-13-001', 'AVAILABLE'), (13, 'SRT-13-002', 'AVAILABLE'), (13, 'SRT-13-003', 'AVAILABLE'),
  (14, 'SRT-14-001', 'AVAILABLE'), (14, 'SRT-14-002', 'AVAILABLE'),
- (15, 'SRT-15-001', 'AVAILABLE');
+ (15, 'SRT-15-001', 'AVAILABLE'),
+ (16, 'SRT-16-001', 'AVAILABLE'), (16, 'SRT-16-002', 'AVAILABLE'), (16, 'SRT-16-003', 'AVAILABLE'),
+ (17, 'SRT-17-001', 'AVAILABLE'), (17, 'SRT-17-002', 'AVAILABLE'),
+ (18, 'SRT-18-001', 'AVAILABLE'), (18, 'SRT-18-002', 'AVAILABLE'),
+ (19, 'SRT-19-001', 'AVAILABLE'), (19, 'SRT-19-002', 'AVAILABLE'),
+ (20, 'SRT-20-001', 'AVAILABLE'), (20, 'SRT-20-002', 'AVAILABLE'), (20, 'SRT-20-003', 'AVAILABLE'),
+ (21, 'SRT-21-001', 'AVAILABLE'), (21, 'SRT-21-002', 'AVAILABLE'), (21, 'SRT-21-003', 'AVAILABLE'),
+ (22, 'SRT-22-001', 'AVAILABLE'), (22, 'SRT-22-002', 'AVAILABLE'),
+ (23, 'SRT-23-001', 'AVAILABLE'), (23, 'SRT-23-002', 'AVAILABLE'),
+ (24, 'SRT-24-001', 'AVAILABLE'), (24, 'SRT-24-002', 'AVAILABLE'),
+ (25, 'SRT-25-001', 'AVAILABLE'), (25, 'SRT-25-002', 'AVAILABLE'),
+ (26, 'SRT-26-001', 'AVAILABLE'),
+ (27, 'SRT-27-001', 'AVAILABLE'), (27, 'SRT-27-002', 'AVAILABLE'),
+ (28, 'SRT-28-001', 'AVAILABLE');
 
 
 -- ---------------------------------------------------------------------

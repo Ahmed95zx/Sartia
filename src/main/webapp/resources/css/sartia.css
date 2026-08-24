@@ -203,9 +203,16 @@ textarea { resize: vertical; min-height: 84px; }
    image, never around a present one. */
 .movie-card .cover {
     display: block;
+    /* Inset by the same amount as the card body below, so the poster's edges
+       line up with the title and text instead of bleeding to the card border.
+       Full-bleed artwork above padded text reads as an image overflowing its
+       card rather than sitting inside one. */
+    margin: 14px 14px 0;
     aspect-ratio: 2 / 3;
     background: #0f1620;
-    border-bottom: 1px solid var(--line);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden;
 }
 .movie-card .cover img {
     width: 100%;
@@ -225,7 +232,7 @@ textarea { resize: vertical; min-height: 84px; }
 }
 
 .movie-card .card-body {
-    padding: 14px 15px 0;
+    padding: 12px 14px 0;
     display: flex;
     flex-direction: column;
     gap: 7px;
@@ -243,7 +250,7 @@ textarea { resize: vertical; min-height: 84px; }
     overflow: hidden;
 }
 .movie-card .card-foot {
-    margin: 12px 15px 0;
+    margin: 12px 14px 0;
     padding: 10px 0 14px;
     border-top: 1px solid var(--line);
     display: flex;
