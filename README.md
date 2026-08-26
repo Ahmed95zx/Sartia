@@ -12,6 +12,7 @@ A web system for managing a movie rental library, built in Java with **JSF**,
 - [Demo Users              ](#demo-users)
 - [System URLs             ](#system-urls)
 - [Running the Tests       ](#running-the-tests)
+  - [Integration-test database](#preparing-the-integration-test-database)
 - [Configuration           ](#configuration)
 - [Project Structure       ](#project-structure)
 - [Troubleshooting         ](#troubleshooting)
@@ -76,8 +77,9 @@ The scripts are re-runnable — `seed.sql` clears the tables before loading, so 
 mvn clean package
 ```
 
-This produces `target/sartia.war`. It also runs the full test suite, including
-integration tests that require a running MySQL. To skip the tests:
+This produces `target/sartia.war`. It also runs the unit tests, but not the
+integration tests — those belong to `mvn verify` — so no database is needed to
+build. To skip the tests entirely:
 
 ```powershell
 mvn clean package -DskipTests
@@ -185,33 +187,66 @@ curl.exe "http://localhost:8080/sartia/api/movies?q=%D7%9E%D7%98%D7%A8%D7%99%D7%
 ## Running the Tests
 
 ```powershell
-# All tests — 33 tests (requires a running MySQL)
+# Unit tests only — 17 tests, no database needed
 mvn test
 
-# Unit tests only — no database needed
-mvn test "-Dgroups=!integration"
-
-# Concurrency tests only
-mvn test -Dtest=ConcurrentRentalIT
+# Everything — 33 tests (needs MySQL and the test schema, see below)
+mvn verify
 ```
 
-*Bash* — only the filtered run differs; the quotes stop the shell treating `!`
-as a history expansion:
+The suite is split across two Maven plugins: surefire runs the `*Test` classes
+in the `test` phase, failsafe runs the `*IT` classes in the `verify` phase.
 
-```bash
-mvn test -Dgroups='!integration'
-```
-
-| Class                     |    Type     | Tests |
-|---------------------------|-------------|-------|
-| `PasswordsTest`           |    Unit     |   6   |
-| `RentalTest`              |    Unit     |   6   |
-| `MovieSearchCriteriaTest` |    Unit     |   5   |
-| `RentalLifecycleIT`       | Integration |   11  |
-| `ConcurrentRentalIT`      | Integration |   5   |
+| Class                     |    Type     | Tests | Phase        |
+|---------------------------|-------------|-------|--------------|
+| `PasswordsTest`           |    Unit     |   6   | `mvn test`   |
+| `RentalTest`              |    Unit     |   6   | `mvn test`   |
+| `MovieSearchCriteriaTest` |    Unit     |   5   | `mvn test`   |
+| `RentalLifecycleIT`       | Integration |   11  | `mvn verify` |
+| `ConcurrentRentalIT`      | Integration |   5   | `mvn verify` |
 
 `ConcurrentRentalIT` runs dozens of threads in parallel and verifies that no
 double rental is created — this is the central correctness test of the system.
+
+### Preparing the integration-test database
+
+The integration tests insert real rows, so they run against a throwaway
+`sartia_test` schema and never against the application's own `sartia` database
+— a test run cannot leave fixture films in the demo catalogue. Create that
+schema once:
+
+```powershell
+cmd /c "mysql -u root -p < scripts\setup-test-db.sql"
+```
+
+*Bash:*
+
+```bash
+mysql -u root -p < scripts/setup-test-db.sql
+```
+
+The connection details are the `test.db.url`, `test.db.user` and
+`test.db.password` properties in `pom.xml`. Failsafe passes them to the forked
+test JVM, where they override the `db.*` keys from `sartia.properties`. Either
+edit them there or override on the command line:
+
+```powershell
+mvn verify "-Dtest.db.password=YOUR_PASSWORD"
+```
+
+To run one integration class, use `it.test` — plain `-Dtest` selects for
+surefire, which no longer owns these classes:
+
+```powershell
+mvn verify -Dit.test=ConcurrentRentalIT
+```
+
+If an earlier run (before the schemas were separated) left fixture rows in the
+real database, `scripts/cleanup-test-data.sql` removes them:
+
+```powershell
+cmd /c "mysql -u root -p < scripts\cleanup-test-data.sql"
+```
 
 ### End-to-end test
 
@@ -263,12 +298,11 @@ project/
 │   ├── schema.sql                    Database schema (6 tables)
 │   └── seed.sql                      Demo data (re-runnable: clears, then loads)
 ├── docs/
-│   ├── 03-README-הוראות-הרצה.pdf                Run instructions (Hebrew)
 │   ├── סרטיה- מסמך תיאור פונקציונליות.pdf       Functional specification (Hebrew)
 │   └── סרטיה-מסמך תכנון.pdf                     Design document (Hebrew)
 ├── scripts/
-│   ├── setup-test-db.sql             Creates the integration-test database
-│   ├── cleanup-test-data.sql         Clears test data
+│   ├── setup-test-db.sql             Creates the sartia_test schema for the integration tests
+│   ├── cleanup-test-data.sql         Removes fixture rows from a polluted database
 │   └── smoke-test.sh                 End-to-end test against a running deployment
 ├── src/main/java/sartia/
 │   ├── presentation/
@@ -346,12 +380,11 @@ ALTER DATABASE sartia CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 ### Integration tests fail
 
-They require a running MySQL with the schema installed. To run only the unit
-tests:
-
-```powershell
-mvn test "-Dgroups=!integration"
-```
+They need a running MySQL with the `sartia_test` schema installed — see
+[Preparing the integration-test database](#preparing-the-integration-test-database).
+`Unknown database 'sartia_test'` means that step was skipped;
+`Access denied` means `test.db.password` in `pom.xml` does not match your root
+password. To run only the unit tests, use `mvn test` instead of `mvn verify`.
 
 ### Resetting the demo data to a clean state
 
