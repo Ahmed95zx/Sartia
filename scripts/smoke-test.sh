@@ -101,8 +101,8 @@ BTN=$(button_name "$WORK/login.html")
 
 curl -s -b "$JAR" -c "$JAR" -L -o "$WORK/after-login.html" \
      --data-urlencode "loginForm=loginForm" \
-     --data-urlencode "loginForm:username=david" \
-     --data-urlencode "loginForm:password=david123" \
+     --data-urlencode "loginForm:username=ahmad" \
+     --data-urlencode "loginForm:password=ahmad123" \
      --data-urlencode "$BTN=login" \
      --data-urlencode "jakarta.faces.ViewState=$VS" \
      "$BASE/login.xhtml"
@@ -149,7 +149,7 @@ BBTN=$(button_name "$WORK/blogin.html")
 
 curl -s -b "$BJAR" -c "$BJAR" -L -o "$WORK/after-bad.html" \
      --data-urlencode "loginForm=loginForm" \
-     --data-urlencode "loginForm:username=david" \
+     --data-urlencode "loginForm:username=ahmad" \
      --data-urlencode "loginForm:password=wrong-password" \
      --data-urlencode "$BBTN=login" \
      --data-urlencode "jakarta.faces.ViewState=$BVS" \

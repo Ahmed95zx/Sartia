@@ -23,6 +23,15 @@
     <hikari.version>5.1.0</hikari.version>
     <junit.version>5.10.2</junit.version>
     <payara.version>6.2024.6</payara.version>
+
+    <!-- Integration tests run against their OWN throwaway schema, never the
+         application's `sartia` database, so a test run can never leave films
+         like "admin return <n>" in the real catalogue. Override on the command
+         line to point elsewhere, e.g.
+             mvn verify -Dtest.db.url=jdbc:mysql://127.0.0.1:3306/other -->
+    <test.db.url>jdbc:mysql://127.0.0.1:3306/sartia_test?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=Asia/Jerusalem&amp;characterEncoding=UTF-8</test.db.url>
+    <test.db.user>root</test.db.user>
+    <test.db.password>ahmed1995</test.db.password>
   </properties>
 
   <dependencies>
@@ -85,19 +94,46 @@
         <version>3.2.5</version>
         <configuration>
           <includes>
-            <!-- Unit tests. -->
+            <!-- Unit tests only. The integration tests (*IT.java) talk to a
+                 real MySQL database, so they run under the failsafe plugin
+                 below (the `mvn verify` phase) against a throwaway schema,
+                 rather than here in `mvn test` against the live one. -->
             <include>**/*Test.java</include>
-            <!-- Integration tests: these need MySQL running with the schema
-                 applied. They are included in the normal build because the
-                 concurrency guarantee they check is the project's central
-                 correctness claim, and a suite that silently skips it would
-                 report success without having verified anything.
-
-                 To run only the unit tests when no database is available:
-                     mvn test -Dgroups='!integration' -->
-            <include>**/*IT.java</include>
           </includes>
         </configuration>
+      </plugin>
+
+      <!-- Integration tests: the concurrency guarantee they check is the
+           project's central correctness claim, so `mvn verify` must run them.
+           They need MySQL running with the schema applied - provision the
+           throwaway schema once with:
+               mysql -u root -p < scripts/setup-test-db.sql
+           `systemPropertyVariables` below are passed to the forked test JVM and
+           override the db.* keys in sartia.properties (Database.resolve()
+           consults System properties first), so the tests connect to
+           sartia_test and never to the application's `sartia` database. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>3.2.5</version>
+        <configuration>
+          <includes>
+            <include>**/*IT.java</include>
+          </includes>
+          <systemPropertyVariables>
+            <db.url>${test.db.url}</db.url>
+            <db.user>${test.db.user}</db.user>
+            <db.password>${test.db.password}</db.password>
+          </systemPropertyVariables>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <!-- Runs the packaged WAR on an embedded Payara Micro server:

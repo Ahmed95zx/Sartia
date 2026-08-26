@@ -58,8 +58,12 @@
             <nav class="main-nav">
                 <h:link outcome="/catalog.xhtml" value="Catalogue"/>
 
+                <!--
+                  Customers only: an administrator's account rents nothing, so
+                  the page would always be empty for them.
+                -->
                 <h:link outcome="/my-rentals.xhtml" value="My Rentals"
-                        rendered="#{userSession.loggedIn}"/>
+                        rendered="#{userSession.loggedIn and not userSession.admin}"/>
 
                 <h:link outcome="/admin/movies.xhtml" value="Manage Catalogue"
                         rendered="#{userSession.admin}"/>

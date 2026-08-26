@@ -4,8 +4,8 @@
 --  Run after schema.sql. Safe to re-run: it clears the tables it fills.
 --
 --  The password_hash values below are genuine PBKDF2-HMAC-SHA256 hashes
---  produced by util.Passwords, not placeholders. To mint new ones:
---      java -cp target/classes util.Passwords <password>
+--  produced by sartia.common.util.Passwords, not placeholders. To mint new ones:
+--      java -cp target/classes sartia.common.util.Passwords <password>
 --
 --  Cover images are stored under src/main/webapp/images/covers and are
 --  referenced by an application-relative path, so the catalogue renders
@@ -15,8 +15,7 @@
 --  Demo accounts
 --  -------------
 --      admin / admin123   (administrator)
---      david / david123   (customer)
---      noa   / noa123     (customer)
+--      ahmad / ahmad123   (customer)
 -- =====================================================================
 
 USE sartia;
@@ -37,10 +36,8 @@ SET FOREIGN_KEY_CHECKS = 1;
 INSERT INTO users (id, username, password_hash, email, full_name, phone, role) VALUES
  (1, 'admin', '210000:t4Yp3elTM1vCsm5U/52Uew==:G57IpiiF6OLC1zW8Eoc6daeaUG+JC218x4ezdqZ+Rek=',
      'admin@sartia.co.il',  'System Administrator', '03-5555555', 'ADMIN'),
- (2, 'david', '210000:IImw9y8E76IwAiEGvpIxMQ==:+4OLVh5dvDOSpIVl5EXUN1uDh4M1NSQZ3w9cZUhq9Sc=',
-     'david@example.com',   'David Cohen',          '052-1234567', 'CUSTOMER'),
- (3, 'noa',   '210000:h1HLfjSWTjX0wILDaI1Vmg==:65YQidWEz2T1ay9Hqym2PUc6oB5Oa9tBf2zg9U1cw6A=',
-     'noa@example.com',     'Noa Levi',             '054-7654321', 'CUSTOMER');
+ (2, 'ahmad', '210000:iwFNGExFFVN/Hk6pXc9mnQ==:CJrbozTE8gbMmI1uXcNvUtmQTwmHvBdgmZSLCu/b6Ws=',
+     'ahmad@example.com',   'Ahmad',                '050-1112233', 'CUSTOMER');
 
 
 -- ---------------------------------------------------------------------
@@ -186,7 +183,7 @@ INSERT INTO copies (movie_id, barcode, status) VALUES
 -- ---------------------------------------------------------------------
 -- Rental history
 --
--- Three closed rentals to give the customers something to review, plus
+-- Three closed rentals to give the customer something to review, plus
 -- one open and one deliberately overdue rental so the administrator's
 -- returns screen and the late-fee calculation are visible immediately.
 -- ---------------------------------------------------------------------
@@ -199,13 +196,13 @@ INSERT INTO rentals (copy_id, user_id, rented_at, due_date, returned_at, late_fe
  ((SELECT id FROM copies WHERE barcode = 'SRT-6-001'), 2,
   DATE_SUB(NOW(), INTERVAL 20 DAY), DATE_SUB(CURDATE(), INTERVAL 13 DAY),
   DATE_SUB(NOW(), INTERVAL 15 DAY), 0.00),
- ((SELECT id FROM copies WHERE barcode = 'SRT-9-001'), 3,
+ ((SELECT id FROM copies WHERE barcode = 'SRT-9-001'), 2,
   DATE_SUB(NOW(), INTERVAL 18 DAY), DATE_SUB(CURDATE(), INTERVAL 11 DAY),
   DATE_SUB(NOW(), INTERVAL 12 DAY), 0.00);
 
 -- Open, still within its lending period.
 INSERT INTO rentals (copy_id, user_id, rented_at, due_date) VALUES
- ((SELECT id FROM copies WHERE barcode = 'SRT-3-001'), 3,
+ ((SELECT id FROM copies WHERE barcode = 'SRT-3-001'), 2,
   DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_ADD(CURDATE(), INTERVAL 5 DAY));
 UPDATE copies SET status = 'RENTED' WHERE barcode = 'SRT-3-001';
 
@@ -223,4 +220,4 @@ UPDATE copies SET status = 'RENTED' WHERE barcode = 'SRT-13-001';
 INSERT INTO reviews (movie_id, user_id, rating, comment) VALUES
  (1, 2, 5, 'A classic. It still holds up after all these years.'),
  (6, 2, 4, 'A moving film. A little long, but worth it.'),
- (9, 3, 5, 'Stunning animation, and it works just as well for adults.');
+ (9, 2, 5, 'Stunning animation, and it works just as well for adults.');

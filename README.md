@@ -1,7 +1,5 @@
 # Sartia — Video/DVD Rental System
 
-Final project · The Open University of Israel
-
 A web system for managing a movie rental library, built in Java with **JSF**,
 **JDBC** and **REST** on top of a **MySQL** database.
 
@@ -9,58 +7,64 @@ A web system for managing a movie rental library, built in Java with **JSF**,
 
 ## Contents
 
-- [Prerequisites](#prerequisites)
+- [Prerequisites           ](#prerequisites)
 - [Installation and Running](#installation-and-running)
-- [Demo Users](#demo-users)
-- [System URLs](#system-urls)
-- [Running the Tests](#running-the-tests)
-- [Configuration](#configuration)
-- [Project Structure](#project-structure)
-- [Troubleshooting](#troubleshooting)
-- [Documentation](#documentation)
+- [Demo Users              ](#demo-users)
+- [System URLs             ](#system-urls)
+- [Running the Tests       ](#running-the-tests)
+- [Configuration           ](#configuration)
+- [Project Structure       ](#project-structure)
+- [Troubleshooting         ](#troubleshooting)
+- [Documentation           ](#documentation)
 
 ---
 
 ## Prerequisites
 
-| Component | Version | Check |
-|-----------|---------|-------|
-| JDK | 17 or later | `java -version` |
-| Maven | 3.8 or later | `mvn -version` |
-| MySQL | 8.0 or later | Must be running before starting the system |
+| Component | Version      | Check                                      |
+|-----------|--------------|--------------------------------------------|
+| JDK       | 17 or later  | `java -version`                            |
+| Maven     | 3.8 or later | `mvn -version`                             |
+| MySQL     | 8.0 or later | Must be running before starting the system |
 
-The application server (Payara Micro) is downloaded automatically by Maven — no
-need to install it.
+The application server (Payara Micro) is downloaded automatically by Maven — no need to install it.
 
 ---
 
 ## Installation and Running
+
+Commands are written for **PowerShell**. Where the Bash equivalent differs it is
+given directly beneath, labelled *Bash*; where no alternative is shown, the
+command is identical in both shells.
 
 ### Step 1 — Set up the database
 
 Run both scripts in order: the first builds the schema, the second loads the
 demo data.
 
-```bash
-mysql -u root -p < db/schema.sql
-mysql -u root -p < db/seed.sql
-```
-
-On Windows, if `mysql` is not on your PATH, use the full path:
-
-```
-"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" -u root -p < db\schema.sql
-```
-
-In PowerShell the `<` operator is not supported. Run the command through `cmd`
-instead:
+PowerShell has no `<` input-redirection operator — it is reserved — so the
+scripts are fed to `mysql` through `cmd`:
 
 ```powershell
 cmd /c "mysql -u root -p --default-character-set=utf8mb4 < db\schema.sql"
+cmd /c "mysql -u root -p --default-character-set=utf8mb4 < db\seed.sql"
 ```
 
-The scripts are re-runnable — `seed.sql` clears the tables before loading, so it
-can be used at any time to return the system to a clean demo state.
+If `mysql` is not on your PATH, add its directory for the current session
+first:
+
+```powershell
+$env:Path += ";C:\Program Files\MySQL\MySQL Server 8.0\bin"
+```
+
+*Bash* — the redirection works directly:
+
+```bash
+mysql -u root -p --default-character-set=utf8mb4 < db/schema.sql
+mysql -u root -p --default-character-set=utf8mb4 < db/seed.sql
+```
+
+The scripts are re-runnable — `seed.sql` clears the tables before loading, so it can be used at any time to return the system to a clean demo state.
 
 > **Important:** If the root password is not empty, update `db.password` in
 > `src/main/resources/sartia.properties` before building — see
@@ -68,20 +72,20 @@ can be used at any time to return the system to a clean demo state.
 
 ### Step 2 — Build
 
-```bash
+```powershell
 mvn clean package
 ```
 
 This produces `target/sartia.war`. It also runs the full test suite, including
 integration tests that require a running MySQL. To skip the tests:
 
-```bash
+```powershell
 mvn clean package -DskipTests
 ```
 
 ### Step 3 — Run
 
-```bash
+```powershell
 mvn payara-micro:start
 ```
 
@@ -104,7 +108,7 @@ To stop the server: `Ctrl+C`.
 
 If the WAR is already built and you have a copy of `payara-micro.jar`:
 
-```bash
+```powershell
 java -jar payara-micro.jar --deploy target/sartia.war --contextroot /sartia --port 8080
 ```
 
@@ -112,11 +116,10 @@ java -jar payara-micro.jar --deploy target/sartia.war --contextroot /sartia --po
 
 ## Demo Users
 
-| Username | Password | Role |
-|----------|----------|------|
-| `admin` | `admin123` | Administrator — catalog, inventory and returns management |
-| `david` | `david123` | Customer — has rental history and one overdue rental |
-| `noa` | `noa123` | Customer — has one open rental in good standing |
+| Username | Password   | Role                                                                  |
+|----------|------------|-----------------------------------------------------------------------|
+| `admin`  | `admin123` | Administrator — catalog, inventory and returns management             |
+| `ahmad`  | `ahmad123` | Customer — has rental history, one open rental and one overdue rental |
 
 The demo data includes 28 movies across 7 categories (four per category), 57
 copies, both closed and open rentals, one deliberately overdue rental (to
@@ -129,62 +132,83 @@ demonstrate the "out of stock" state).
 
 ### User interface
 
-| URL | Description | Access |
-|-----|-------------|--------|
-| `/sartia/` | Movie catalog (home page) | Public |
-| `/sartia/movie.xhtml?id=1` | Movie details | Public |
-| `/sartia/login.xhtml` | Login | Public |
-| `/sartia/register.xhtml` | Registration | Public |
-| `/sartia/my-rentals.xhtml` | My rentals | Customer |
-| `/sartia/admin/movies.xhtml` | Catalog management | Administrator |
-| `/sartia/admin/returns.xhtml` | Open rentals | Administrator |
+| URL                           | Description               | Access        |
+|-------------------------------|---------------------------|---------------|
+| `/sartia/`                    | Movie catalog (home page) | Public        |
+| `/sartia/movie.xhtml?id=1`    | Movie details             | Public        |
+| `/sartia/login.xhtml`         | Login                     | Public        |
+| `/sartia/register.xhtml`      | Registration              | Public        |
+| `/sartia/my-rentals.xhtml`    | My rentals                | Customer      |
+| `/sartia/admin/movies.xhtml`  | Catalog management        | Administrator |
+| `/sartia/admin/returns.xhtml` | Open rentals              | Administrator |
 
 ### REST interface
 
-| URL | Description |
-|-----|-------------|
-| `/sartia/api/movies` | Search the catalog (`q`, `categoryId`, `available`, `page`, `size`) |
-| `/sartia/api/movies/{id}` | Movie details |
-| `/sartia/api/movies/{id}/reviews` | Reviews for a movie |
-| `/sartia/api/categories` | Categories with movie counts |
+| URL                               |       Description                                                    |
+|-----------------------------------|----------------------------------------------------------------------|
+| `/sartia/api/movies`              | Search the catalog (`q`, `categoryId`,  `available`, `page`, `size`) |
+| `/sartia/api/movies/{id}`         | Movie details                                                        |
+| `/sartia/api/movies/{id}/reviews` | Reviews for a movie                                                  |
+| `/sartia/api/categories`          | Categories with movie counts                                         |
 
 Examples:
 
+```powershell
+curl.exe "http://localhost:8080/sartia/api/categories"
+curl.exe "http://localhost:8080/sartia/api/movies?available=true&size=5"
+curl.exe "http://localhost:8080/sartia/api/movies/1"
+```
+
+Spell out `curl.exe`: in Windows PowerShell 5.1 a bare `curl` is an alias for
+`Invoke-WebRequest`, which takes different arguments. To get parsed JSON back
+rather than raw text, use `Invoke-RestMethod`:
+
+```powershell
+Invoke-RestMethod "http://localhost:8080/sartia/api/movies/1"
+```
+
+*Bash* — plain `curl`, otherwise identical:
+
 ```bash
-curl "http://localhost:8080/sartia/api/categories"
-curl "http://localhost:8080/sartia/api/movies?available=true&size=5"
 curl "http://localhost:8080/sartia/api/movies/1"
 ```
 
 Searching in Hebrew requires URL encoding. `%D7%9E%D7%98%D7%A8%D7%99%D7%A7%D7%A1`
 is "מטריקס" (The Matrix):
 
-```bash
-curl "http://localhost:8080/sartia/api/movies?q=%D7%9E%D7%98%D7%A8%D7%99%D7%A7%D7%A1"
+```powershell
+curl.exe "http://localhost:8080/sartia/api/movies?q=%D7%9E%D7%98%D7%A8%D7%99%D7%A7%D7%A1"
 ```
 
 ---
 
 ## Running the Tests
 
-```bash
+```powershell
 # All tests — 33 tests (requires a running MySQL)
 mvn test
 
 # Unit tests only — no database needed
-mvn test -Dgroups='!integration'
+mvn test "-Dgroups=!integration"
 
 # Concurrency tests only
 mvn test -Dtest=ConcurrentRentalIT
 ```
 
-| Class | Type | Tests |
-|-------|------|-------|
-| `PasswordsTest` | Unit | 6 |
-| `RentalTest` | Unit | 6 |
-| `MovieSearchCriteriaTest` | Unit | 5 |
-| `RentalLifecycleIT` | Integration | 11 |
-| `ConcurrentRentalIT` | Integration | 5 |
+*Bash* — only the filtered run differs; the quotes stop the shell treating `!`
+as a history expansion:
+
+```bash
+mvn test -Dgroups='!integration'
+```
+
+| Class                     |    Type     | Tests |
+|---------------------------|-------------|-------|
+| `PasswordsTest`           |    Unit     |   6   |
+| `RentalTest`              |    Unit     |   6   |
+| `MovieSearchCriteriaTest` |    Unit     |   5   |
+| `RentalLifecycleIT`       | Integration |   11  |
+| `ConcurrentRentalIT`      | Integration |   5   |
 
 `ConcurrentRentalIT` runs dozens of threads in parallel and verifies that no
 double rental is created — this is the central correctness test of the system.
@@ -193,9 +217,12 @@ double rental is created — this is the central correctness test of the system.
 
 Against an already running system:
 
-```bash
-bash scripts/smoke-test.sh
+```powershell
+bash scripts/smoke-test.sh http://10.0.0.8:8080/sartia
 ```
+
+The script itself is Bash, so on Windows it needs `bash` on the PATH — Git Bash
+and WSL both provide it. The command is the same from either shell.
 
 The script runs 22 checks: loading every page, the REST interface, access
 control, login as customer and as administrator, and rejection of a wrong
@@ -210,7 +237,7 @@ The file `src/main/resources/sartia.properties`:
 ```properties
 db.url=jdbc:mysql://127.0.0.1:3306/sartia?useSSL=false&...
 db.user=root
-db.password=
+db.password=*****
 
 db.pool.maxSize=10
 db.pool.minIdle=2
@@ -222,7 +249,7 @@ rental.lateFeePerDay=3.00
 
 Every key can be overridden with a JVM runtime parameter, with no rebuild:
 
-```bash
+```powershell
 java -Ddb.password=secret -Drental.periodDays=14 -jar payara-micro.jar ...
 ```
 
@@ -233,23 +260,46 @@ java -Ddb.password=secret -Drental.periodDays=14 -jar payara-micro.jar ...
 ```
 project/
 ├── db/
-│   ├── schema.sql              Database schema
-│   └── seed.sql                Demo data
+│   ├── schema.sql                    Database schema (6 tables)
+│   └── seed.sql                      Demo data (re-runnable: clears, then loads)
 ├── docs/
-│   ├── 01-מסמך-פונקציונליות.md  Functional specification
-│   └── 02-מסמך-תכנון.md         Design document
+│   ├── 03-README-הוראות-הרצה.pdf                Run instructions (Hebrew)
+│   ├── סרטיה- מסמך תיאור פונקציונליות.pdf       Functional specification (Hebrew)
+│   └── סרטיה-מסמך תכנון.pdf                     Design document (Hebrew)
 ├── scripts/
-│   └── smoke-test.sh           End-to-end test
-├── src/main/java/
-│   ├── model/                  Domain objects
-│   ├── dao/                    Data access and transactions
-│   ├── service/                Business logic
-│   ├── web/                    JSF backing beans
-│   ├── rest/                   REST interface
-│   └── util/                   Passwords and configuration
-├── src/main/webapp/            XHTML pages, CSS and configuration
-├── src/test/java/              Tests
-├── pom.xml
+│   ├── setup-test-db.sql             Creates the integration-test database
+│   ├── cleanup-test-data.sql         Clears test data
+│   └── smoke-test.sh                 End-to-end test against a running deployment
+├── src/main/java/sartia/
+│   ├── presentation/
+│   │   ├── web/                      JSF backing beans (catalog, login, register, my-rentals, ...)
+│   │   │   └── admin/                Admin beans (catalogue management, returns)
+│   │   ├── rest/                     JAX-RS REST resources
+│   │   │   └── dto/                  REST data-transfer objects
+│   │   └── security/                 Authentication / authorization filter
+│   ├── business/
+│   │   ├── service/                  Business logic (catalog, rental, review, user)
+│   │   ├── domain/                   Domain objects (Movie, Copy, Rental, User, ...)
+│   │   └── exception/                Business exceptions
+│   ├── persistence/
+│   │   └── dao/                      Data access and transactions (JDBC)
+│   └── common/
+│       ├── config/                   App configuration and startup listener
+│       └── util/                     Password hashing
+├── src/main/resources/
+│   ├── sartia.properties             Database and application settings
+│   └── messages.properties           UI text
+├── src/main/webapp/
+│   ├── catalog.xhtml, movie.xhtml, login.xhtml, register.xhtml, my-rentals.xhtml, error.xhtml
+│   │                                 Public and customer pages
+│   ├── admin/                        Admin pages (movies, returns)
+│   ├── resources/css/                Stylesheet
+│   ├── images/covers/                Cover art
+│   └── WEB-INF/
+│       ├── templates/layout.xhtml    Shared page template and navigation
+│       └── web.xml, beans.xml, faces-config.xml   Servlet, CDI and JSF configuration
+├── src/test/java/sartia/             Unit tests and integration tests (*IT)
+├── pom.xml                           Maven build (WAR, packaged with Payara Micro)
 └── README.md
 ```
 
@@ -261,7 +311,7 @@ project/
 
 Usually MySQL is not running, or the schema was never created.
 
-```bash
+```powershell
 mysql -u root -p -e "USE sartia; SHOW TABLES;"
 ```
 
@@ -272,13 +322,16 @@ Six tables should appear. If they do not, run `db/schema.sql`.
 The root password does not match. Update `db.password` in `sartia.properties`,
 or run with:
 
-```bash
-mvn payara-micro:start -Ddb.password=<password>
+```powershell
+mvn payara-micro:start -Ddb.password=YOUR_PASSWORD
 ```
+
+Written without angle brackets on purpose: `<` is a reserved operator in
+PowerShell, so typing `<password>` literally is a syntax error.
 
 ### Port 8080 is in use
 
-```bash
+```powershell
 mvn payara-micro:start -Dpayara.microPort=8081
 ```
 
@@ -296,25 +349,31 @@ ALTER DATABASE sartia CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 They require a running MySQL with the schema installed. To run only the unit
 tests:
 
-```bash
-mvn test -Dgroups='!integration'
+```powershell
+mvn test "-Dgroups=!integration"
 ```
 
 ### Resetting the demo data to a clean state
 
+```powershell
+cmd /c "mysql -u root -p --default-character-set=utf8mb4 < db\seed.sql"
+```
+
+*Bash:*
+
 ```bash
-mysql -u root -p < db/seed.sql
+mysql -u root -p --default-character-set=utf8mb4 < db/seed.sql
 ```
 
 ---
 
 ## Documentation
 
-| Document | Contents |
-|----------|----------|
-| [`docs/01-מסמך-פונקציונליות.md`](docs/01-מסמך-פונקציונליות.md) | The system from the user's point of view: every screen, every action, the business rules and the API |
-| [`docs/02-מסמך-תכנון.md`](docs/02-מסמך-תכנון.md) | System structure: architecture, ERD, description of every class, concurrency handling and security |
+| Document                                   | Contents                                        |
+|--------------------------------------------|------------------------------------------------ |
+| docs/סרטיה- מסמך תיאור פונקציונליות.pdf  | The system from the user's point of view |
+| docs/סרטיה-מסמך תכנון.pdf                 | System structure                         |
 
 The most interesting entry point in the code is
-`src/main/java/service/RentalService.java` — it holds the logic that prevents
+`src/main/java/sartia/business/service/RentalService.java` — it holds the logic that prevents
 double rentals, together with the reasoning behind each step.

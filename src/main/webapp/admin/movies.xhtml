@@ -134,34 +134,52 @@
             <div class="panel">
                 <h2>Copy inventory</h2>
 
-                <table class="data" style="margin-bottom:16px;">
-                    <thead>
-                        <tr>
-                            <th>Barcode</th>
-                            <th>Status</th>
-                            <th>Added on</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <ui:repeat value="#{movieAdminBean.inventory}" var="copy">
-                            <tr>
-                                <td>#{copy.barcode}</td>
-                                <td>
-                                    <h:outputText value="#{copy.status.label}"
-                                                  styleClass="badge #{copy.status eq 'AVAILABLE' ? 'badge-ok'
-                                                                     : (copy.status eq 'RENTED' ? 'badge-warn' : 'badge-out')}"/>
-                                </td>
-                                <td>
-                                    <h:outputText value="#{copy.acquiredAt}">
-                                        <f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy"/>
-                                    </h:outputText>
-                                </td>
-                            </tr>
-                        </ui:repeat>
-                    </tbody>
-                </table>
-
+                <!--
+                  One form around both the table and the toolbar below it, so
+                  the per-copy Remove buttons post like any other command.
+                -->
                 <h:form>
+                    <table class="data" style="margin-bottom:16px;">
+                        <thead>
+                            <tr>
+                                <th>Barcode</th>
+                                <th>Status</th>
+                                <th>Added on</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <ui:repeat value="#{movieAdminBean.inventory}" var="copy">
+                                <tr>
+                                    <td>#{copy.barcode}</td>
+                                    <td>
+                                        <h:outputText value="#{copy.status.label}"
+                                                      styleClass="badge #{copy.status eq 'AVAILABLE' ? 'badge-ok'
+                                                                         : (copy.status eq 'RENTED' ? 'badge-warn' : 'badge-out')}"/>
+                                    </td>
+                                    <td>
+                                        <h:outputText value="#{copy.acquiredAt}">
+                                            <f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy"/>
+                                        </h:outputText>
+                                    </td>
+                                    <td style="white-space:nowrap;">
+                                        <!--
+                                          Disabled for a disc that is out, and the
+                                          confirm box is a courtesy, but neither is
+                                          the safeguard: the service refuses a disc
+                                          on loan, one any rental record still
+                                          points at, and the title's last copy.
+                                        -->
+                                        <h:commandButton value="Remove" action="#{movieAdminBean.removeCopy(copy)}"
+                                                         styleClass="btn btn-danger btn-sm"
+                                                         disabled="#{copy.status eq 'RENTED'}"
+                                                         onclick="return confirm('Permanently remove this copy?');"/>
+                                    </td>
+                                </tr>
+                            </ui:repeat>
+                        </tbody>
+                    </table>
+
                     <div class="toolbar">
                         <div style="flex:0 0 auto;">
                             <label for="addCopies">Copies to add</label>
